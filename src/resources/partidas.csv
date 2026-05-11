@@ -1,0 +1,73 @@
+id,data,hora,timeA,timeB,estadio,pais_estadio,grupo,rodada,fase
+1,2026-06-11,16:00,México,África do Sul,Azteca Stadium,México,A,1,grupos
+2,2026-06-11,23:00,Coreia do Sul,República Tcheca,Estadio Chivas,México,A,1,grupos
+3,2026-06-18,13:00,República Tcheca,África do Sul,Mercedes-Benz Stadium,Estados Unidos,A,2,grupos
+4,2026-06-18,22:00,México,Coreia do Sul,Estadio Chivas,México,A,2,grupos
+5,2026-06-24,22:00,África do Sul,Coreia do Sul,Estadio BBVA,México,A,3,grupos
+6,2026-06-24,22:00,República Tcheca,México,Azteca Stadium,México,A,3,grupos
+7,2026-06-12,16:00,Canadá,Bósnia e Herzegovina,BMO Field,Canadá,B,1,grupos
+8,2026-06-13,16:00,Catar,Suíça,Levi's Stadium,Estados Unidos,B,1,grupos
+9,2026-06-18,16:00,Suíça,Bósnia e Herzegovina,SoFi Stadium,Estados Unidos,B,2,grupos
+10,2026-06-18,19:00,Canadá,Catar,BC Place,Canadá,B,2,grupos
+11,2026-06-24,16:00,Bósnia e Herzegovina,Catar,CenturyLink Field,Estados Unidos,B,3,grupos
+12,2026-06-24,16:00,Suíça,Canadá,BC Place,Canadá,B,3,grupos
+19,2026-06-13,19:00,Brasil,Marrocos,MetLife Stadium,Estados Unidos,C,1,grupos
+20,2026-06-13,22:00,Haiti,Escócia,Gillette Stadium,Estados Unidos,C,1,grupos
+21,2026-06-19,19:00,Escócia,Marrocos,Gillette Stadium,Estados Unidos,C,2,grupos
+22,2026-06-19,21:30,Brasil,Haiti,Lincoln Financial Field,Estados Unidos,C,2,grupos
+23,2026-06-24,19:00,Marrocos,Haiti,Mercedes-Benz Stadium,Estados Unidos,C,3,grupos
+24,2026-06-24,19:00,Escócia,Brasil,Hard Rock Stadium,Estados Unidos,C,3,grupos
+13,2026-06-12,22:00,Estados Unidos,Paraguai,SoFi Stadium,Estados Unidos,D,1,grupos
+14,2026-06-14,01:00,Austrália,Turquia,BC Place,Canadá,D,1,grupos
+15,2026-06-19,16:00,Estados Unidos,Austrália,CenturyLink Field,Estados Unidos,D,2,grupos
+16,2026-06-20,00:00,Turquia,Paraguai,Levi's Stadium,Estados Unidos,D,2,grupos
+17,2026-06-25,23:00,Paraguai,Austrália,Levi's Stadium,Estados Unidos,D,3,grupos
+18,2026-06-25,23:00,Turquia,Estados Unidos,SoFi Stadium,Estados Unidos,D,3,grupos
+25,2026-06-14,14:00,Alemanha,Curaçao,NRG Stadium,Estados Unidos,E,1,grupos
+26,2026-06-14,20:00,Costa do Marfim,Equador,Lincoln Financial Field,Estados Unidos,E,1,grupos
+27,2026-06-20,17:00,Alemanha,Costa do Marfim,BMO Field,Canadá,E,2,grupos
+28,2026-06-20,21:00,Equador,Curaçao,GEHA Field at Arrowhead Stadium,Estados Unidos,E,2,grupos
+29,2026-06-25,17:00,Curaçao,Costa do Marfim,Lincoln Financial Field,Estados Unidos,E,3,grupos
+30,2026-06-25,17:00,Equador,Alemanha,MetLife Stadium,Estados Unidos,E,3,grupos
+31,2026-06-14,17:00,Holanda,Japão,AT&T Stadium,Estados Unidos,F,1,grupos
+32,2026-06-14,23:00,Suécia,Tunísia,Estadio BBVA,México,F,1,grupos
+33,2026-06-20,14:00,Holanda,Suécia,NRG Stadium,Estados Unidos,F,2,grupos
+34,2026-06-21,01:00,Tunísia,Japão,Estadio BBVA,México,F,2,grupos
+35,2026-06-25,20:00,Japão,Suécia,AT&T Stadium,Estados Unidos,F,3,grupos
+36,2026-06-25,20:00,Tunísia,Holanda,GEHA Field at Arrowhead Stadium,Estados Unidos,F,3,grupos
+37,2026-06-15,16:00,Bélgica,Egito,CenturyLink Field,Estados Unidos,G,1,grupos
+38,2026-06-15,22:00,Irã,Nova Zelândia,SoFi Stadium,Estados Unidos,G,1,grupos
+39,2026-06-21,16:00,Bélgica,Irã,SoFi Stadium,Estados Unidos,G,2,grupos
+40,2026-06-21,22:00,Nova Zelândia,Egito,BC Place,Canadá,G,2,grupos
+41,2026-06-27,00:00,Egito,Irã,CenturyLink Field,Estados Unidos,G,3,grupos
+42,2026-06-27,00:00,Nova Zelândia,Bélgica,BC Place,Canadá,G,3,grupos
+43,2026-06-15,13:00,Espanha,Cabo Verde,Mercedes-Benz Stadium,Estados Unidos,H,1,grupos
+44,2026-06-15,19:00,Arábia Saudita,Uruguai,Hard Rock Stadium,Estados Unidos,H,1,grupos
+45,2026-06-21,13:00,Espanha,Arábia Saudita,Mercedes-Benz Stadium,Estados Unidos,H,2,grupos
+46,2026-06-21,19:00,Uruguai,Cabo Verde,Hard Rock Stadium,Estados Unidos,H,2,grupos
+47,2026-06-26,21:00,Cabo Verde,Arábia Saudita,NRG Stadium,Estados Unidos,H,3,grupos
+48,2026-06-26,21:00,Uruguai,Espanha,Estadio Chivas,México,H,3,grupos
+49,2026-06-16,16:00,França,Senegal,MetLife Stadium,Estados Unidos,I,1,grupos
+50,2026-06-16,19:00,Iraque,Noruega,Gillette Stadium,Estados Unidos,I,1,grupos
+51,2026-06-22,18:00,França,Iraque,Lincoln Financial Field,Estados Unidos,I,2,grupos
+52,2026-06-22,21:00,Noruega,Senegal,MetLife Stadium,Estados Unidos,I,2,grupos
+53,2026-06-26,16:00,Senegal,Iraque,BMO Field,Canadá,I,3,grupos
+54,2026-06-26,16:00,Noruega,França,Gillette Stadium,Estados Unidos,I,3,grupos
+55,2026-06-16,22:00,Argentina,Argélia,GEHA Field at Arrowhead Stadium,Estados Unidos,J,1,grupos
+56,2026-06-17,01:00,Áustria,Jordânia,Levi's Stadium,Estados Unidos,J,1,grupos
+57,2026-06-22,14:00,Argentina,Áustria,AT&T Stadium,Estados Unidos,J,2,grupos
+58,2026-06-23,00:00,Jordânia,Argélia,Levi's Stadium,Estados Unidos,J,2,grupos
+59,2026-06-27,23:00,Argélia,Áustria,GEHA Field at Arrowhead Stadium,Estados Unidos,J,3,grupos
+60,2026-06-27,23:00,Jordânia,Argentina,AT&T Stadium,Estados Unidos,J,3,grupos
+61,2026-06-17,14:00,Portugal,RD Congo,NRG Stadium,Estados Unidos,K,1,grupos
+62,2026-06-17,23:00,Uzbequistão,Colômbia,Azteca Stadium,México,K,1,grupos
+63,2026-06-23,14:00,Portugal,Uzbequistão,NRG Stadium,Estados Unidos,K,2,grupos
+64,2026-06-23,23:00,Colômbia,RD Congo,Estadio Chivas,México,K,2,grupos
+65,2026-06-27,20:30,RD Congo,Uzbequistão,Mercedes-Benz Stadium,Estados Unidos,K,3,grupos
+66,2026-06-27,20:30,Colômbia,Portugal,Hard Rock Stadium,Estados Unidos,K,3,grupos
+67,2026-06-17,17:00,Inglaterra,Croácia,AT&T Stadium,Estados Unidos,L,1,grupos
+68,2026-06-17,20:00,Gana,Panamá,BMO Field,Canadá,L,1,grupos
+69,2026-06-23,17:00,Inglaterra,Gana,Gillette Stadium,Estados Unidos,L,2,grupos
+70,2026-06-23,20:00,Panamá,Croácia,BMO Field,Canadá,L,2,grupos
+71,2026-06-27,18:00,Croácia,Gana,Lincoln Financial Field,Estados Unidos,L,3,grupos
+72,2026-06-27,18:00,Panamá,Inglaterra,MetLife Stadium,Estados Unidos,L,3,grupos

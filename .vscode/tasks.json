@@ -1,0 +1,75 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Start Vaadin Web (Jetty)",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-lc",
+                "./mvnw jetty:run & echo $! > .vscode/jetty.pid; wait $!"
+            ],
+
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    ".vscode\\start-jetty.ps1"
+                ]
+            },
+
+            "isBackground": true,
+
+            "problemMatcher": {
+                "owner": "jetty",
+                "pattern": {
+                    "regexp": "."
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".",
+                    "endsPattern": "Started ServerConnector@.*0.0.0.0:8080|Started Server@|JETTY_READY"
+                }
+            },
+
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "group": "web"
+            }
+        },
+
+        {
+            "label": "Stop Vaadin Web (Jetty)",
+            "type": "shell",
+
+            "command": "bash",
+            "args": [
+                "-lc",
+                "if [[ -f .vscode/jetty.pid ]]; then kill $(cat .vscode/jetty.pid) 2>/dev/null || true; rm -f .vscode/jetty.pid; fi; pkill -f './mvnw jetty:run|mvn jetty:run' 2>/dev/null || true"
+            ],
+
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    ".vscode\\stop-jetty.ps1"
+                ]
+            },
+
+            "problemMatcher": [],
+
+            "presentation": {
+                "reveal": "never",
+                "panel": "dedicated",
+                "group": "web"
+            }
+        }
+    ]
+}
