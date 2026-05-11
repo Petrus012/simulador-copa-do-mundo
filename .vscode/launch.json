@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "F5: Web + Terminal",
+            "request": "launch",
+            "mainClass": "MainApp",
+            "projectName": "simulador-copa",
+            "console": "integratedTerminal",
+            "preLaunchTask": "Start Vaadin Web (Jetty)",
+            "postDebugTask": "Stop Vaadin Web (Jetty)"
+        }
+    ]
+}
