@@ -92,13 +92,32 @@ public class SimuladorAnalistasCopaDoMundo {
         
         for (int i = 0; i < novosPalpites.size(); i++) {
             Palpite p = novosPalpites.get(i);
-            palpitesAnalista.put(p.getPartida().getId(), p);
             Partida partida = buscarPartidaPorId(p.getPartida().getId());
-            if (partida != null) {
-                partida.setPalpite(p);
-            }
             
-            quantidadeImportada++;
+            if (partida != null && !partida.isFinalizada()) {
+                palpitesAnalista.put(partida.getId(), p);
+                partida.setPalpite(p);
+                quantidadeImportada++;
+            }  
+        }
+        
+        return quantidadeImportada;
+    }
+
+    public int importarResultadosOficiais(String caminhoArquivo) {
+        CarregadorDeDados carregador = new CarregadorDeDados();
+        List<Palpite> resultadosLidos = carregador.carregarPalpites(caminhoArquivo, this);
+        
+        int quantidadeImportada = 0;
+        
+        for (int i = 0; i < resultadosLidos.size(); i++) {
+            Palpite leitura = resultadosLidos.get(i);
+            Partida partida = buscarPartidaPorId(leitura.getPartida().getId());
+            
+            if (partida != null) {
+                partida.registrarResultadoOficial(leitura.getGolsTimeA(), leitura.getGolsTimeB());
+                quantidadeImportada++;
+            }
         }
         
         return quantidadeImportada;
