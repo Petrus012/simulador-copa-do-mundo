@@ -120,7 +120,7 @@ public class SimuladorAnalistasCopaDoMundo {
         }
 
         List<EstatisticasSelecao> classificacao = grupoEncontrado.calcularEstatisticasPelosPalpites();
-        Collections.sort(classificacao, new ClassificacaoComparator());
+        Collections.sort(classificacao, new ClassificacaoComparator(grupoEncontrado.getPartidas()));
 
         return classificacao;
     }
