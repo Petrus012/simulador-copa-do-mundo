@@ -1,51 +1,77 @@
 package br.ufla.copa.core.model;
 
 public class Partida {
-    private int id;
-    private Selecao timeA;
-    private Selecao timeB;
-    private String grupo;
-    private String data;
-    private String hora;
-    private boolean finalizada;
+    private final int id;
+    private final Selecao timeDaCasa;
+    private final Selecao timeVisitante;
+    
+    private int golsTimeCasaOficial;
+    private int golsTimeVisitanteOficial;
+    
+    private StatusPartida status;
+    private Palpite palpite;
 
-    public Partida(int id, Selecao timeA, Selecao timeB, String grupo, String data, String hora) {
+    public Partida(int id, Selecao timeDaCasa, Selecao timeVisitante) {
         this.id = id;
-        this.timeA = timeA;
-        this.timeB = timeB;
-        this.grupo = grupo;
-        this.data = data;
-        this.hora = hora;
-        this.finalizada = false;
+        this.timeDaCasa = timeDaCasa;
+        this.timeVisitante = timeVisitante;
+        this.status = StatusPartida.AGENDADA;
+    }
+
+    public void setResultadoOficial(int golsCasa, int golsVisitante) {
+        this.golsTimeCasaOficial = golsCasa;
+        this.golsTimeVisitanteOficial = golsVisitante;
+        this.status = StatusPartida.FINALIZADA;
+    }
+
+    public void setPalpite(Palpite palpite) {
+        this.palpite = palpite;
+    }
+
+    public Palpite getPalpite() {
+        return palpite;
+    }
+
+    public boolean temPalpite() {
+        return palpite != null;
     }
 
     public int getId() {
         return id;
     }
 
-    public Selecao getTimeA() {
-        return timeA;
+    public Selecao getTimeDaCasa() {
+        return timeDaCasa;
     }
 
-    public Selecao getTimeB() {
-        return timeB;
+    public Selecao getTimeVisitante() {
+        return timeVisitante;
     }
 
-    public String getGrupo() {
-        return grupo;
+    public int getGolsTimeCasaOficial() {
+        return golsTimeCasaOficial;
     }
 
-    public void finalizarPartida() {
-        this.finalizada = true;
+    public int getGolsTimeVisitanteOficial() {
+        return golsTimeVisitanteOficial;
     }
 
-    public boolean isFinalizada() {
-        return finalizada;
+    public StatusPartida getStatus() {
+        return status;
     }
 
     @Override
     public String toString() {
-        return String.format("Jogo %d [%s] %s x %s (%s as %s)",
-                id, grupo, timeA.getNome(), timeB.getNome(), data, hora);
+        String placar = (status == StatusPartida.FINALIZADA) 
+                ? " " + golsTimeCasaOficial + " x " + golsTimeVisitanteOficial + " " 
+                : " x ";
+                
+        String infoPalpite = temPalpite() 
+                ? " [Palpite: " + palpite.getGolsTimeCasa() + " x " + palpite.getGolsTimeVisitante() + "]" 
+                : "";
+
+        return "Partida " + id + ": " + 
+               timeDaCasa.getNome() + placar + timeVisitante.getNome() + 
+               " | Status: " + status + infoPalpite;
     }
 }
