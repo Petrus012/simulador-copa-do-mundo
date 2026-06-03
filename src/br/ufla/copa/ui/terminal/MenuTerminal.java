@@ -6,6 +6,7 @@ import java.util.Scanner;
 import br.ufla.copa.core.model.Estadio;
 import br.ufla.copa.core.model.Grupo;
 import br.ufla.copa.core.model.Partida;
+import br.ufla.copa.core.model.EstatisticasSelecao;
 import br.ufla.copa.core.service.SimuladorAnalistasCopaDoMundo;
 
 /**
@@ -45,7 +46,7 @@ public class MenuTerminal {
                 tratarMenu(opcao);
             }
             
-        } while (opcao != 4);
+        } while (opcao != 5);
         
         entrada.close();
     }
@@ -55,7 +56,8 @@ public class MenuTerminal {
         System.out.println("1 - Exibir Estádios");
         System.out.println("2 - Exibir Partidas por Grupo");
         System.out.println("3 - Importar Palpites");
-        System.out.println("4 - Sair");
+        System.out.println("4 - Exibir Tabela de Classificação do Grupo");
+        System.out.println("5 - Sair");
     }
 
     private void tratarMenu(int opcao) {
@@ -70,6 +72,9 @@ public class MenuTerminal {
                 importarPalpites();
                 break;
             case 4:
+                exibirClassificacaoGrupo();
+                break;
+            case 5:
                 System.out.println("Saindo do programa...");
                 break;
             default:
@@ -116,5 +121,32 @@ public class MenuTerminal {
 
         int quantidade = simulador.importarPalpites(caminho);
         System.out.println("\nForam importados/atualizados " + quantidade + " palpites com sucesso!");
+    }
+
+    private void exibirClassificacaoGrupo() {
+        System.out.print("\nDigite a letra do grupo que deseja visualizar a classificação (ex: A, B, C): ");
+        String letraGrupo = entrada.nextLine().trim().toUpperCase();
+
+        try {
+            List<EstatisticasSelecao> classificacao = simulador.obterClassificacaoGrupo(letraGrupo);
+            
+            System.out.println("\n--- Tabela de Classificação do Grupo " + letraGrupo + " ---");
+            System.out.printf("%-4s | %-20s | %-2s | %-2s | %-3s\n", "Pos", "Seleção", "P", "V", "SG");
+            System.out.println("-----------------------------------------------------");
+            
+            for (int i = 0; i < classificacao.size(); i++) {
+                EstatisticasSelecao est = classificacao.get(i);
+                System.out.printf("%2dº  | %-20s | %2d | %2d | %3d\n", 
+                        (i + 1), 
+                        est.getSelecao().getNome(), 
+                        est.getPontos(), 
+                        est.getVitorias(), 
+                        est.getSaldoGols());
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("\nErro: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("\nOcorreu um erro inesperado ao processar a classificação do grupo.");
+        }
     }
 }
