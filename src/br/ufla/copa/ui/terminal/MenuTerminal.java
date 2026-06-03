@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Scanner;
 
 import br.ufla.copa.core.model.Estadio;
+import br.ufla.copa.core.model.Grupo;
+import br.ufla.copa.core.model.Partida;
 import br.ufla.copa.core.service.SimuladorAnalistasCopaDoMundo;
 
 /**
@@ -31,22 +33,72 @@ public class MenuTerminal {
     public void iniciar() {
         System.out.println("\nIniciando interface via terminal...\n");
 
+        int opcao = 0;
+        // Executa o loop de menu
+        do {
+            exibirMenu();
+            System.out.print("\nDigite sua opção: ");
+            
+            String linha = entrada.nextLine();
+            if (!linha.trim().isEmpty()) {
+                opcao = Integer.parseInt(linha);
+                tratarMenu(opcao);
+            }
+            
+        } while (opcao != 3);
+        
+        entrada.close();
+    }
+
+    private void exibirMenu() {
+        System.out.println("\n--- SIMULADOR DA COPA DO MUNDO 2026 ---");
+        System.out.println("1 - Exibir Estádios");
+        System.out.println("2 - Exibir Partidas por Grupo");
+        System.out.println("3 - Sair");
+    }
+
+    private void tratarMenu(int opcao) {
+        switch (opcao) {
+            case 1:
+                exibirEstadios();
+                break;
+            case 2:
+                exibirPartidasPorGrupo();
+                break;
+            case 3:
+                System.out.println("Saindo do programa...");
+                break;
+            default:
+                System.out.println("Opção inválida!");
+                break;
+        }
+    }
+
+    private void exibirEstadios() {
         // Busca a list de estádios
         List<Estadio> listaEstadios = simulador.buscarEstadios();
+        
+        // Exibe os estádios
+        System.out.println("\nEstadios:");
+        for (Estadio estadio : listaEstadios) {
+            System.out.println(estadio.getNome() + " - capacidade: " + estadio.getCapacidade() + " pessoas");
+        }
+    }
 
-        // Executa o loop de menu
-        String opcao;
-        do {
-            // Exibe os estádios
-            System.out.println("Estadios:");
-            for (Estadio  estadio : listaEstadios) {
-                System.out.println(estadio.getNome() + " - capacidade: " + estadio.getCapacidade() + " pessoas");
+    private void exibirPartidasPorGrupo() {
+        System.out.print("\nDigite a letra do grupo que deseja visualizar (ex: A, B, C): ");
+        String letraGrupo = entrada.nextLine().trim().toUpperCase();
+
+        Grupo grupoEscolhido = simulador.buscarGrupo(letraGrupo);
+
+        if (grupoEscolhido != null) {
+            System.out.println("\n--- Partidas do Grupo " + letraGrupo + " ---");
+            for (int i = 0; i < grupoEscolhido.getPartidas().size(); i++) {
+                Partida p = grupoEscolhido.getPartidas().get(i);
+                System.out.println(p.toString());
             }
-
-            // Sai do loop se o usuário digitar 'sair' (ignorando maiúsculas/minúsculas)
-            System.out.println("\nDigite 'sair' para terminar");
-            opcao = entrada.nextLine();
-        } while (! "sair".equalsIgnoreCase(opcao));
-
+        } else {
+            System.out.println("\nGrupo não encontrado.");
+        }
     }
 }
