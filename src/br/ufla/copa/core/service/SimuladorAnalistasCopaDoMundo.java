@@ -2,12 +2,15 @@ package br.ufla.copa.core.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Collections;
 
 import br.ufla.copa.core.data.CarregadorDeDados;
 import br.ufla.copa.core.model.Estadio;
 import br.ufla.copa.core.model.Grupo;
+import br.ufla.copa.core.model.Palpite;
+import br.ufla.copa.core.model.Partida;
 
 /**
  * Código de exemplo da classe Princial que trata a Regra de Negócio
@@ -20,6 +23,7 @@ public class SimuladorAnalistasCopaDoMundo {
     private static SimuladorAnalistasCopaDoMundo instancia;
 
     private Map<String, Grupo> gruposCopa;
+    private Map<Integer, Palpite> palpitesAnalista;
 
     /**
      * Construtor da classe
@@ -35,6 +39,7 @@ public class SimuladorAnalistasCopaDoMundo {
 
         CarregadorDeDados carregador = new CarregadorDeDados();
         this.gruposCopa = carregador.carregarPartidas();
+        this.palpitesAnalista = new HashMap<>();
     }
 
     /**
@@ -61,5 +66,34 @@ public class SimuladorAnalistasCopaDoMundo {
             return null;
         }
         return gruposCopa.get(letraGrupo);
+    }
+
+    public Partida buscarPartidaPorId(int id) {
+        if (gruposCopa != null) {
+            for (Grupo grupo : gruposCopa.values()) {
+                for (int i = 0; i < grupo.getPartidas().size(); i++) {
+                    Partida p = grupo.getPartidas().get(i);
+                    if (p.getId() == id) {
+                        return p;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public int importarPalpites(String caminhoArquivo) {
+        CarregadorDeDados carregador = new CarregadorDeDados();
+        List<Palpite> novosPalpites = carregador.carregarPalpites(caminhoArquivo, this);
+        
+        int quantidadeImportada = 0;
+        
+        for (int i = 0; i < novosPalpites.size(); i++) {
+            Palpite p = novosPalpites.get(i);
+            palpitesAnalista.put(p.getPartida().getId(), p);
+            quantidadeImportada++;
+        }
+        
+        return quantidadeImportada;
     }
 }
