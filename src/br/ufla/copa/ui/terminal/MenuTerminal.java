@@ -9,33 +9,20 @@ import br.ufla.copa.core.model.Partida;
 import br.ufla.copa.core.model.EstatisticasSelecao;
 import br.ufla.copa.core.service.SimuladorAnalistasCopaDoMundo;
 
-/**
- * Classe que trata a interação com o usuário via terminal
- */
 public class MenuTerminal {
 
-    // Objeto Scanner para leitura de dados via terminal
     private Scanner entrada;
-    // Simulador, objeto principal da regra de negócio
     private SimuladorAnalistasCopaDoMundo simulador;
 
-    /**
-     * Construtor da classe
-     */
     public MenuTerminal() {
         entrada = new Scanner(System.in);
-        // obtém a única instância do simulador (Padrão de Projeto Singleton)
         simulador = SimuladorAnalistasCopaDoMundo.getInstance();
     }
 
-    /**
-     * Método que inicia a execução do menu via terminal
-     */
     public void iniciar() {
         System.out.println("\nIniciando interface via terminal...\n");
 
         int opcao = 0;
-        // Executa o loop de menu
         do {
             exibirMenu();
             System.out.print("\nDigite sua opção: ");
@@ -46,7 +33,7 @@ public class MenuTerminal {
                 tratarMenu(opcao);
             }
             
-        } while (opcao != 5);
+        } while (opcao != 7);
         
         entrada.close();
     }
@@ -56,8 +43,10 @@ public class MenuTerminal {
         System.out.println("1 - Exibir Estádios");
         System.out.println("2 - Exibir Partidas por Grupo");
         System.out.println("3 - Importar Palpites");
-        System.out.println("4 - Exibir Tabela de Classificação do Grupo");
-        System.out.println("5 - Sair");
+        System.out.println("4 - Exibir Tabela de Classificação dos Palpites");
+        System.out.println("5 - Importar Resultados Oficiais");
+        System.out.println("6 - Exibir Tabela de Classificação Oficial");
+        System.out.println("7 - Sair");
     }
 
     private void tratarMenu(int opcao) {
@@ -75,6 +64,12 @@ public class MenuTerminal {
                 exibirClassificacaoGrupo();
                 break;
             case 5:
+                importarResultadosOficiais();
+                break;
+            case 6:
+                exibirClassificacaoOficial();
+                break;
+            case 7:
                 System.out.println("Saindo do programa...");
                 break;
             default:
@@ -84,10 +79,8 @@ public class MenuTerminal {
     }
 
     private void exibirEstadios() {
-        // Busca a list de estádios
         List<Estadio> listaEstadios = simulador.buscarEstadios();
         
-        // Exibe os estádios
         System.out.println("\nEstadios:");
         for (Estadio estadio : listaEstadios) {
             System.out.println(estadio.getNome() + " - capacidade: " + estadio.getCapacidade() + " pessoas");
@@ -147,6 +140,41 @@ public class MenuTerminal {
             System.out.println("\nErro: " + e.getMessage());
         } catch (Exception e) {
             System.out.println("\nOcorreu um erro inesperado ao processar a classificação do grupo.");
+        }
+    }
+
+    private void importarResultadosOficiais() {
+        System.out.print("\nDigite o caminho do arquivo CSV com resultados (ex: src/resources/resultados.csv): ");
+        String caminho = entrada.nextLine().trim();
+
+        try {
+            int quantidade = simulador.importarResultadosOficiais(caminho);
+            System.out.println("\nForam importados " + quantidade + " resultados oficiais com sucesso!");
+        } catch (Exception e) {
+            System.out.println("\nErro ao importar resultados: Arquivo não encontrado ou formato inválido.");
+        }
+    }
+
+    private void exibirClassificacaoOficial() {
+        System.out.print("\nDigite a letra do grupo que deseja visualizar a classificação OFICIAL (ex: A, B, C): ");
+        String letraGrupo = entrada.nextLine().trim().toUpperCase();
+
+        try {
+            List<EstatisticasSelecao> classificacao = simulador.obterClassificacaoOficialGrupo(letraGrupo);
+            
+            System.out.println("\n--- Tabela OFICIAL do Grupo " + letraGrupo + " ---");
+            System.out.printf("%-4s | %-20s | %-2s | %-2s | %-3s\n", "Pos", "Seleção", "P", "V", "SG");
+            System.out.println("-----------------------------------------------------");
+            
+            for (int i = 0; i < classificacao.size(); i++) {
+                EstatisticasSelecao est = classificacao.get(i);
+                System.out.printf("%2dº  | %-20s | %2d | %2d | %3d\n", 
+                        (i + 1), est.getSelecao().getNome(), est.getPontos(), est.getVitorias(), est.getSaldoGols());
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("\nErro: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("\nOcorreu um erro inesperado ao processar a classificação oficial.");
         }
     }
 }

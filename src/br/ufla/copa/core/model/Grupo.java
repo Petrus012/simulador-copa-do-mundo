@@ -68,4 +68,32 @@ public class Grupo {
 
         return resultados;
     }
+
+    public List<EstatisticasSelecao> calcularEstatisticasPelosResultadosOficiais() {
+        Map<Selecao, EstatisticasSelecao> mapaEstatisticas = new HashMap<>();
+
+        for (Selecao selecao : selecoes) {
+            mapaEstatisticas.put(selecao, new EstatisticasSelecao(selecao));
+        }
+
+        for (Partida partida : partidas) {
+            if (partida.isFinalizada() && partida.getGolsOficiaisTimeA() != null && partida.getGolsOficiaisTimeB() != null) {
+                int golsTimeA = partida.getGolsOficiaisTimeA();
+                int golsTimeB = partida.getGolsOficiaisTimeB();
+
+                EstatisticasSelecao estTimeA = mapaEstatisticas.get(partida.getTimeA());
+                EstatisticasSelecao estTimeB = mapaEstatisticas.get(partida.getTimeB());
+
+                estTimeA.registrarResultado(golsTimeA, golsTimeB);
+                estTimeB.registrarResultado(golsTimeB, golsTimeA);
+            }
+        }
+
+        List<EstatisticasSelecao> resultados = new ArrayList<>();
+        for (EstatisticasSelecao estatistica : mapaEstatisticas.values()) {
+            resultados.add(estatistica);
+        }
+
+        return resultados;
+    }
 }

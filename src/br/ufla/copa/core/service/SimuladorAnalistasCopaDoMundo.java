@@ -143,4 +143,17 @@ public class SimuladorAnalistasCopaDoMundo {
 
         return classificacao;
     }
+
+    public List<EstatisticasSelecao> obterClassificacaoOficialGrupo(String nomeGrupo) {
+        Grupo grupoEncontrado = buscarGrupo(nomeGrupo);
+
+        if (grupoEncontrado == null) {
+            throw new IllegalArgumentException("Grupo não encontrado: " + nomeGrupo);
+        }
+
+        List<EstatisticasSelecao> classificacao = grupoEncontrado.calcularEstatisticasPelosResultadosOficiais();
+        Collections.sort(classificacao, new ClassificacaoComparator(grupoEncontrado.getPartidas()));
+
+        return classificacao;
+    }
 }
