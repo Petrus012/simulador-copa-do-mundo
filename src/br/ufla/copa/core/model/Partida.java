@@ -9,6 +9,8 @@ public class Partida {
     private String hora;
     private boolean finalizada;
     private Palpite palpite;
+    private Integer golsOficiaisTimeA;
+    private Integer golsOficiaisTimeB;
 
     public Partida(int id, Selecao timeA, Selecao timeB, String grupo, String data, String hora) {
         this.id = id;
@@ -50,6 +52,20 @@ public class Partida {
 
     public void setPalpite(Palpite palpite) {
         this.palpite = palpite;
+    }
+
+    public void registrarResultadoOficial(int golsA, int golsB) {
+        this.golsOficiaisTimeA = golsA;
+        this.golsOficiaisTimeB = golsB;
+        this.finalizarPartida();
+    }
+
+    public Integer getGolsOficiaisTimeA() {
+        return golsOficiaisTimeA;
+    }
+
+    public Integer getGolsOficiaisTimeB() {
+        return golsOficiaisTimeB;
     }
 
     @Override
