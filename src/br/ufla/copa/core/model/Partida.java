@@ -8,6 +8,7 @@ public class Partida {
     private String data;
     private String hora;
     private boolean finalizada;
+    private Palpite palpite;
 
     public Partida(int id, Selecao timeA, Selecao timeB, String grupo, String data, String hora) {
         this.id = id;
@@ -41,6 +42,14 @@ public class Partida {
     
     public boolean isFinalizada() {
         return finalizada;
+    }
+
+    public Palpite getPalpite() {
+        return palpite;
+    }
+
+    public void setPalpite(Palpite palpite) {
+        this.palpite = palpite;
     }
 
     @Override
