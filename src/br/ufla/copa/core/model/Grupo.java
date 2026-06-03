@@ -1,61 +1,40 @@
 package br.ufla.copa.core.model;
-import java.util.List;
+
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Collections;
+import java.util.List;
 
 public class Grupo {
-    private char id;
-    private List<Selecao> selecoes;
+    private String nome;
     private List<Partida> partidas;
+    private List<Selecao> selecoes;
 
-    public Grupo(char id) {
-        this.id = id;
-        this.selecoes = new ArrayList<>();
+    public Grupo(String nome) {
+        this.nome = nome;
         this.partidas = new ArrayList<>();
-    }
-
-    public char getId() {
-        return id;
-    }
-
-    public List<Selecao> getSelecoes() {
-        return Collections.unmodifiableList(selecoes);
-    }
-
-    public List<Partida> getPartidas() {
-        return Collections.unmodifiableList(partidas);
-    }
-
-    public void adicionarSelecao(Selecao selecao) {
-        if (!selecoes.contains(selecao)) {
-            selecoes.add(selecao);
-        }
+        this.selecoes = new ArrayList<>();
     }
 
     public void adicionarPartida(Partida partida) {
-        if (!partidas.contains(partida)) {
-            partidas.add(partida);
+        this.partidas.add(partida);
+
+        if (!selecoes.contains(partida.getTimeA())) {
+            selecoes.add(partida.getTimeA());
+        }
+
+        if (!selecoes.contains(partida.getTimeB())) {
+            selecoes.add(partida.getTimeB());
         }
     }
 
-    public String getSelecaoPorNome(String nome) {
-        for (Selecao selecao : selecoes) {
-            if (selecao.getNome().equals(nome)) {
-                return selecao.getNome();
-            }
-        }
-        return null;
+    public String getNome() {
+        return nome;
     }
 
-    public Partida getPartidaPorTimes(Selecao time1, Selecao time2) {
-        for (Partida partida : partidas) {
-            if ((partida.getTimeDaCasa().equals(time1) && partida.getTimeVisitante().equals(time2)) ||
-                (partida.getTimeDaCasa().equals(time2) && partida.getTimeVisitante().equals(time1))) {
-                return partida;
-            }
-        }
-        return null;
+    public List<Partida> getPartidas() {
+        return partidas;
     }
 
+    public List<Selecao> getSelecoes() {
+        return selecoes;
+    }
 }
