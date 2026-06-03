@@ -93,6 +93,11 @@ public class SimuladorAnalistasCopaDoMundo {
         for (int i = 0; i < novosPalpites.size(); i++) {
             Palpite p = novosPalpites.get(i);
             palpitesAnalista.put(p.getPartida().getId(), p);
+            Partida partida = buscarPartidaPorId(p.getPartida().getId());
+            if (partida != null) {
+                partida.setPalpite(p);
+            }
+            
             quantidadeImportada++;
         }
         
