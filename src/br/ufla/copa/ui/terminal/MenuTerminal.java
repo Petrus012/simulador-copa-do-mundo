@@ -45,7 +45,7 @@ public class MenuTerminal {
                 tratarMenu(opcao);
             }
             
-        } while (opcao != 3);
+        } while (opcao != 4);
         
         entrada.close();
     }
@@ -54,7 +54,8 @@ public class MenuTerminal {
         System.out.println("\n--- SIMULADOR DA COPA DO MUNDO 2026 ---");
         System.out.println("1 - Exibir Estádios");
         System.out.println("2 - Exibir Partidas por Grupo");
-        System.out.println("3 - Sair");
+        System.out.println("3 - Importar Palpites");
+        System.out.println("4 - Sair");
     }
 
     private void tratarMenu(int opcao) {
@@ -66,6 +67,9 @@ public class MenuTerminal {
                 exibirPartidasPorGrupo();
                 break;
             case 3:
+                importarPalpites();
+                break;
+            case 4:
                 System.out.println("Saindo do programa...");
                 break;
             default:
@@ -100,5 +104,17 @@ public class MenuTerminal {
         } else {
             System.out.println("\nGrupo não encontrado.");
         }
+    }
+
+    private void importarPalpites() {
+        System.out.print("\nDigite o caminho do arquivo CSV (ou aperte Enter para usar src/resources/modelo_palpites.csv): ");
+        String caminho = entrada.nextLine().trim();
+        
+        if (caminho.isEmpty()) {
+            caminho = "src/resources/modelo_palpites.csv";
+        }
+
+        int quantidade = simulador.importarPalpites(caminho);
+        System.out.println("\nForam importados/atualizados " + quantidade + " palpites com sucesso!");
     }
 }
