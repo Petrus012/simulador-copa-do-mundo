@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import br.ufla.copa.core.data.CarregadorDeDados;
+import br.ufla.copa.core.model.ClassificacaoComparator;
+import br.ufla.copa.core.model.EstatisticasSelecao;
 import br.ufla.copa.core.model.Estadio;
 import br.ufla.copa.core.model.Grupo;
 import br.ufla.copa.core.model.Palpite;
@@ -95,5 +97,26 @@ public class SimuladorAnalistasCopaDoMundo {
         }
         
         return quantidadeImportada;
+    }
+
+    public List<EstatisticasSelecao> obterClassificacaoGrupo(String nomeGrupo) {
+        Grupo grupoEncontrado = null;
+        if (gruposCopa != null) {
+            for (String chave : gruposCopa.keySet()) {
+                if (chave.equalsIgnoreCase(nomeGrupo)) {
+                    grupoEncontrado = gruposCopa.get(chave);
+                    break;
+                }
+            }
+        }
+
+        if (grupoEncontrado == null) {
+            throw new IllegalArgumentException("Grupo não encontrado: " + nomeGrupo);
+        }
+
+        List<EstatisticasSelecao> classificacao = grupoEncontrado.calcularEstatisticasPelosPalpites();
+        Collections.sort(classificacao, new ClassificacaoComparator());
+
+        return classificacao;
     }
 }
