@@ -35,39 +35,39 @@ id,timeA,gols_timeA,x,gols_timeB,timeB
 34,Tunísia,1,x,2,Japão
 35,Japão,2,x,1,Suécia
 36,Tunísia,0,x,2,Holanda
-37,Bélgica,1,x,1,Egito
-38,Irã,2,x,0,Nova Zelândia
-39,Bélgica,0,x,1,Irã
-40,Nova Zelândia,1,x,0,Egito
-41,Egito,2,x,0,Irã
-42,Nova Zelândia,1,x,0,Bélgica
-43,Espanha,0,x,1,Cabo Verde
-44,Arábia Saudita,1,x,0,Uruguai
-45,Espanha,0,x,1,Arábia Saudita
-46,Uruguai,1,x,2,Cabo Verde
-47,Cabo Verde,1,x,0,Arábia Saudita
-48,Uruguai,2,x,0,Espanha
-49,França,0,x,2,Senegal
-50,Iraque,1,x,0,Noruega
-51,França,1,x,1,Iraque
-52,Noruega,0,x,2,Senegal
-53,Senegal,0,x,1,Iraque
-54,Noruega,2,x,0,França
-55,Argentina,0,x,2,Argélia
-56,Áustria,0,x,1,Jordânia
-57,Argentina,0,x,2,Áustria
-58,Jordânia,1,x,0,Argélia
-59,Argélia,2,x,0,Áustria
-60,Jordânia,2,x,0,Argentina
-61,Portugal,1,x,1,RD Congo
-62,Uzbequistão,1,x,0,Colômbia
-63,Portugal,0,x,1,Uzbequistão
-64,Colômbia,0,x,2,RD Congo
-65,RD Congo,2,x,0,Uzbequistão
-66,Colômbia,2,x,0,Portugal
-67,Inglaterra,0,x,1,Croácia
-68,Gana,2,x,0,Panamá
-69,Inglaterra,0,x,2,Gana
-70,Panamá,1,x,0,Croácia
-71,Croácia,2,x,0,Gana
-72,Panamá,1,x,0,Inglaterra
+37,Bélgica,2,x,0,Egito
+38,Irã,1,x,1,Nova Zelândia
+39,Bélgica,2,x,0,Irã
+40,Nova Zelândia,0,x,1,Egito
+41,Egito,1,x,1,Irã
+42,Nova Zelândia,0,x,2,Bélgica
+43,Espanha,3,x,0,Cabo Verde
+44,Arábia Saudita,0,x,2,Uruguai
+45,Espanha,2,x,0,Arábia Saudita
+46,Uruguai,3,x,0,Cabo Verde
+47,Cabo Verde,0,x,2,Arábia Saudita
+48,Uruguai,1,x,2,Espanha
+49,França,2,x,1,Senegal
+50,Iraque,0,x,3,Noruega
+51,França,3,x,0,Iraque
+52,Noruega,2,x,1,Senegal
+53,Senegal,1,x,0,Iraque
+54,Noruega,1,x,2,França
+55,Argentina,3,x,1,Argélia
+56,Áustria,2,x,0,Jordânia
+57,Argentina,2,x,1,Áustria
+58,Jordânia,0,x,1,Argélia
+59,Argélia,1,x,2,Áustria
+60,Jordânia,0,x,3,Argentina
+61,Portugal,3,x,0,RD Congo
+62,Uzbequistão,0,x,3,Colômbia
+63,Portugal,2,x,0,Uzbequistão
+64,Colômbia,2,x,1,RD Congo
+65,RD Congo,1,x,2,Uzbequistão
+66,Colômbia,1,x,2,Portugal
+67,Inglaterra,2,x,0,Croácia
+68,Gana,1,x,1,Panamá
+69,Inglaterra,3,x,0,Gana
+70,Panamá,0,x,2,Croácia
+71,Croácia,1,x,2,Gana
+72,Panamá,0,x,2,Inglaterra

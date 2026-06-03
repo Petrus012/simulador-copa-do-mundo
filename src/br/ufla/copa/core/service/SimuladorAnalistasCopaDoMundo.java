@@ -1,50 +1,35 @@
 package br.ufla.copa.core.service;
 
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Collections;
 
 import br.ufla.copa.core.data.CarregadorDeDados;
-import br.ufla.copa.core.model.Estadio;
+import br.ufla.copa.core.model.EstatisticasSelecao;
 import br.ufla.copa.core.model.Grupo;
-import br.ufla.copa.core.model.Palpite;
 import br.ufla.copa.core.model.Partida;
+import br.ufla.copa.core.model.Estadio;
 
 /**
- * Código de exemplo da classe Princial que trata a Regra de Negócio
- * (Domínio) do projeto
+ * Fachada principal do sistema (Padrão Singleton + Facade).
+ * Conecta a interface do usuário com a camada de dados e os serviços de negócio.
  */
 public class SimuladorAnalistasCopaDoMundo {
-    // Lista de estádios da copa
-    private List<Estadio> estadios;
-    // Instância da própria classe (Padrão de Projeto Singleton)
+
     private static SimuladorAnalistasCopaDoMundo instancia;
 
-    private Map<String, Grupo> gruposCopa;
-    private Map<Integer, Palpite> palpitesAnalista;
+    private CarregadorDeDados carregador;
+    private MotorDePontuacao motorDePontuacao;
 
     /**
-     * Construtor da classe
-     * Importante: construtor é privado para uso do padrão de projeto Singleton
+     * Construtor privado — padrão Singleton.
+     * Já inicializa o carregador de dados (partidas) e o motor de pontuação.
      */
     private SimuladorAnalistasCopaDoMundo() {
-        // cria a a lista de estádios
-        estadios = new ArrayList<>();
-
-        // apenas como exemplo, carrega alguns estádios
-        estadios.add(new Estadio("Mineirao", 70000));
-        estadios.add(new Estadio("Maracana", 85000));
-
-        CarregadorDeDados carregador = new CarregadorDeDados();
-        this.gruposCopa = carregador.carregarPartidas();
-        this.palpitesAnalista = new HashMap<>();
+        this.carregador = new CarregadorDeDados();
+        this.motorDePontuacao = new MotorDePontuacao();
     }
 
     /**
-     * Retorna a instância única da classe (Padrão de Projeto Singleton)
-     * @return a instância da classe
+     * Retorna a instância única da classe (Padrão Singleton).
      */
     public static SimuladorAnalistasCopaDoMundo getInstance() {
         if (instancia == null) {
@@ -53,47 +38,100 @@ public class SimuladorAnalistasCopaDoMundo {
         return instancia;
     }
 
-    /**
-     * Retorna uma versão não modificável da coleção de estádios
-     * @return coleção de estádios
-     */
+    // -----------------------------------------------------------------------
+    // Consultas de dados
+    // -----------------------------------------------------------------------
+
     public List<Estadio> buscarEstadios() {
-        return Collections.unmodifiableList(estadios);
+        return carregador.getEstadios();
     }
 
-    public Grupo buscarGrupo(String letraGrupo) {
-        if (gruposCopa == null) {
-            return null;
-        }
-        return gruposCopa.get(letraGrupo);
+    public List<Grupo> buscarGrupos() {
+        return carregador.getGrupos();
     }
 
-    public Partida buscarPartidaPorId(int id) {
-        if (gruposCopa != null) {
-            for (Grupo grupo : gruposCopa.values()) {
-                for (int i = 0; i < grupo.getPartidas().size(); i++) {
-                    Partida p = grupo.getPartidas().get(i);
-                    if (p.getId() == id) {
-                        return p;
-                    }
-                }
+    public Grupo buscarGrupo(char letraGrupo) {
+        for (Grupo g : carregador.getGrupos()) {
+            if (g.getNome() == letraGrupo) {
+                return g;
             }
         }
         return null;
     }
 
-    public int importarPalpites(String caminhoArquivo) {
-        CarregadorDeDados carregador = new CarregadorDeDados();
-        List<Palpite> novosPalpites = carregador.carregarPalpites(caminhoArquivo, this);
-        
-        int quantidadeImportada = 0;
-        
-        for (int i = 0; i < novosPalpites.size(); i++) {
-            Palpite p = novosPalpites.get(i);
-            palpitesAnalista.put(p.getPartida().getId(), p);
-            quantidadeImportada++;
+    public Partida buscarPartidaPorId(int id) {
+        for (Partida p : carregador.getPartidas()) {
+            if (p.getId() == id) {
+                return p;
+            }
         }
-        
-        return quantidadeImportada;
+        return null;
+    }
+
+    // -----------------------------------------------------------------------
+    // Importação (H2 e H4)
+    // -----------------------------------------------------------------------
+
+    /**
+     * Importa palpites de um arquivo CSV (H2).
+     * @return quantidade de palpites importados com sucesso
+     */
+    public int importarPalpites(String caminhoArquivo) {
+        return carregador.importarPalpites(caminhoArquivo);
+    }
+
+    /**
+     * Importa resultados oficiais de um arquivo CSV (H4).
+     * Partidas importadas ficam com status FINALIZADA e passam a bloquear novos palpites.
+     */
+    public void importarResultadosOficiais(String caminhoArquivo) {
+        carregador.importarResultadosOficiais(caminhoArquivo);
+    }
+
+    // -----------------------------------------------------------------------
+    // Classificação (H3 / H4)
+    // -----------------------------------------------------------------------
+
+    /**
+     * Retorna a tabela de classificação já calculada e ordenada de um grupo.
+     * Usa resultados oficiais quando disponíveis; palpites caso contrário.
+     */
+    public List<EstatisticasSelecao> obterClassificacaoGrupo(char nomeGrupo) {
+        Grupo grupoEncontrado = buscarGrupo(nomeGrupo);
+        if (grupoEncontrado == null) {
+            throw new IllegalArgumentException("Grupo não encontrado: " + nomeGrupo);
+        }
+        return grupoEncontrado.getClassificacao();
+    }
+
+    // -----------------------------------------------------------------------
+    // Pontuação de palpites (H5 e H6)
+    // -----------------------------------------------------------------------
+
+    /**
+     * Calcula a pontuação detalhada do palpite em uma partida específica (H5).
+     * Retorna null se a partida não tiver palpite ou não estiver finalizada.
+     */
+    public ResultadoPontuacao calcularPontuacaoPartida(int idPartida) {
+        Partida partida = buscarPartidaPorId(idPartida);
+        if (partida == null) {
+            throw new IllegalArgumentException("Partida não encontrada: " + idPartida);
+        }
+        return motorDePontuacao.calcularPontuacaoPartida(partida);
+    }
+
+    /**
+     * Calcula a pontuação de todos os palpites sobre partidas finalizadas (H6).
+     * @return lista de ResultadoPontuacao, uma entrada por partida pontuável
+     */
+    public List<ResultadoPontuacao> calcularPontuacaoTotal() {
+        return motorDePontuacao.calcularPontuacaoTotal(carregador.getPartidas());
+    }
+
+    /**
+     * Soma os pontos de uma lista de resultados (H6).
+     */
+    public int somarPontuacao(List<ResultadoPontuacao> resultados) {
+        return motorDePontuacao.somarPontuacao(resultados);
     }
 }

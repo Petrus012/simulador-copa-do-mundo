@@ -24,13 +24,8 @@ public class Selecao {
         if (getClass() != obj.getClass()) {
             return false;
         }
-
+        
         Selecao outraSelecao = (Selecao) obj;
         return Objects.equals(this.nome, outraSelecao.getNome());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(nome);
     }
 }
