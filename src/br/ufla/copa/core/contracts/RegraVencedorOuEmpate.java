@@ -1,7 +1,5 @@
 package br.ufla.copa.core.contracts;
 
-import br.ufla.copa.core.contracts.RegraDePontuacaoDePalpite;
-
 /**
  * R1 — Vencedor ou Empate (10 pontos)
  * Concede pontos se o analista acertou qual time venceu,

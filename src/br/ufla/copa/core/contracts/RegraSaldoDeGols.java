@@ -1,7 +1,5 @@
 package br.ufla.copa.core.contracts;
 
-import br.ufla.copa.core.contracts.RegraDePontuacaoDePalpite;
-
 /**
  * R2 — Saldo de Gols (5 pontos)
  * Concede pontos se o analista acertou a diferença de gols entre as equipes.
