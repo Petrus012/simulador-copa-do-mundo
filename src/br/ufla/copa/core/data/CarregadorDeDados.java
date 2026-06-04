@@ -51,7 +51,7 @@ public class CarregadorDeDados {
                 int idPartida = Integer.parseInt(campos[0].trim());
                 Selecao timeDaCasa = buscarOuCriarSelecao(campos[3].trim());
                 Selecao timeVisitante = buscarOuCriarSelecao(campos[4].trim());
-                Estadio estadio = buscarOuCriarEstadio(campos[5].trim(), campos[6].trim());
+                buscarOuCriarEstadio(campos[5].trim(), campos[6].trim());
                 
                 char idGrupo = campos[7].trim().charAt(0);
                 Grupo grupo = buscarOuCriarGrupo(idGrupo);
