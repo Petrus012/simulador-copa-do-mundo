@@ -1,4 +1,6 @@
-package br.ufla.copa.core.contracts;
+package br.ufla.copa.core.rules;
+
+import br.ufla.copa.core.contracts.RegraDePontuacaoDePalpite;
 
 /**
  * R3 — Gols do Vencedor (8 pontos)

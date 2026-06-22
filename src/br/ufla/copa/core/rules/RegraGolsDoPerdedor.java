@@ -1,4 +1,6 @@
-package br.ufla.copa.core.contracts;
+package br.ufla.copa.core.rules;
+
+import br.ufla.copa.core.contracts.RegraDePontuacaoDePalpite;
 
 /**
  * R4 — Gols do Perdedor (2 pontos)
