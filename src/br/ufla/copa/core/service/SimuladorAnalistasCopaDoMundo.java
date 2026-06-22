@@ -35,10 +35,18 @@ public class SimuladorAnalistasCopaDoMundo {
         this.carregador = new CarregadorDeDados();
         this.motorDePontuacao = new MotorDePontuacao();
 
-        this.analistas = new ArrayList<>();
-        Analista padrao = new Analista("Júlio");
-        this.analistas.add(padrao);
-        this.analistaAtivo = padrao;
+        // Tenta puxar o Memory Card do HD
+        List<Analista> salvos = carregador.carregarAnalistasDoHD();
+        if (salvos != null && !salvos.isEmpty()) {
+            this.analistas = salvos;
+            this.analistaAtivo = salvos.get(0);
+            hidratarPalpitesDoAnalistaAtivo();
+        } else {
+            this.analistas = new ArrayList<>();
+            Analista padrao = new Analista("Júlio");
+            this.analistas.add(padrao);
+            this.analistaAtivo = padrao;
+        }
     }
 
     public static SimuladorAnalistasCopaDoMundo getInstance() {
@@ -96,6 +104,7 @@ public class SimuladorAnalistasCopaDoMundo {
         this.analistas.add(novo);
         this.analistaAtivo = novo;
         hidratarPalpitesDoAnalistaAtivo(); // Limpa as partidas da tela pro novato
+        salvarEstadoDoSistema();
         return true;
     }
 
@@ -114,6 +123,13 @@ public class SimuladorAnalistasCopaDoMundo {
             }
         }
         return false; // Analista não encontrado
+    }
+
+    /**
+     * Força a gravação imediata do estado de todos os analistas no HD.
+     */
+    public void salvarEstadoDoSistema() {
+        carregador.salvarAnalistasNoHD(this.analistas);
     }
 
     /**
@@ -175,6 +191,7 @@ public class SimuladorAnalistasCopaDoMundo {
                 }
             }
         }
+        salvarEstadoDoSistema();
         return qtdImportada;
     }
 

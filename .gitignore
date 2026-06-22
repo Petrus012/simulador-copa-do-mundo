@@ -28,3 +28,6 @@ webpack.generated.js
 .vscode/jetty.pid
 
 bin/
+
+# Ignora o Memory Card local gerado em tempo de execucao (H08)
+src/resources/analistas.dat

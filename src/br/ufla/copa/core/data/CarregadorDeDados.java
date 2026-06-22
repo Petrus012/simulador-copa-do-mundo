@@ -1,5 +1,6 @@
 package br.ufla.copa.core.data;
 
+import br.ufla.copa.core.model.Analista;
 import br.ufla.copa.core.model.Grupo;
 import br.ufla.copa.core.model.Estadio;
 import br.ufla.copa.core.model.Selecao;
@@ -8,7 +9,11 @@ import br.ufla.copa.core.model.Palpite;
 import br.ufla.copa.core.model.StatusPartida;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,6 +23,7 @@ import java.util.List;
 
 public class CarregadorDeDados {
     private static final String CAMINHO_PARTIDAS = "src/resources/partidas.csv";
+    private static final String CAMINHO_ANALISTAS_BIN = "src/resources/analistas.dat";
     
     private List<Grupo> grupos;
     private List<Estadio> estadios;
@@ -32,6 +38,41 @@ public class CarregadorDeDados {
 
         importarPartidas(CAMINHO_PARTIDAS);
     }
+
+    // -----------------------------------------------------------------------
+    // H08: PERSISTÊNCIA BINÁRIA DOS ANALISTAS 
+    // -----------------------------------------------------------------------
+
+    /**
+     * Grava a lista completa de analistas e seus palpites no HD.
+     */
+    public void salvarAnalistasNoHD(List<Analista> analistas) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(CAMINHO_ANALISTAS_BIN))) {
+            oos.writeObject(analistas);
+        } catch (IOException e) {
+            System.err.println("Erro ao salvar Memory Card dos analistas: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Tenta ler o arquivo do HD. Retorna null se for a primeira execução do software.
+     */
+    @SuppressWarnings("unchecked")
+    public List<Analista> carregarAnalistasDoHD() {
+        Path caminho = Path.of(CAMINHO_ANALISTAS_BIN);
+        if (!Files.exists(caminho)) {
+            return null; // O arquivo ainda não nasceu
+        }
+
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(CAMINHO_ANALISTAS_BIN))) {
+            return (List<Analista>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Aviso: Arquivo de analistas corrompido ou de versão antiga. Ignorando...");
+            return null;
+        }
+    }
+
+    // Importação CSV Original (Intocada)
 
     public void importarPartidas(String caminhoArquivo) {
         Path caminho = Path.of(caminhoArquivo);
@@ -78,13 +119,9 @@ public class CarregadorDeDados {
                 if (linha.isBlank()) continue;
 
                 String[] campos = linha.split(",", -1);
-                
-                // Prevenção de erro caso a linha não tenha colunas suficientes
                 if (campos.length < 5) continue; 
 
                 int idPartida = Integer.parseInt(campos[0].trim());
-                
-                // CORREÇÃO DOS ÍNDICES: 2 e 4
                 String golsCasaStr = campos[2].trim(); 
                 String golsVisStr = campos[4].trim();
 
@@ -122,8 +159,6 @@ public class CarregadorDeDados {
                 if (campos.length < 5) continue;
 
                 int idPartida = Integer.parseInt(campos[0].trim());
-
-                // Mesmo formato do modelo_palpites.csv: id, timeA, gols_timeA, x, gols_timeB, timeB
                 String golsCasaStr = campos[2].trim();
                 String golsVisStr = campos[4].trim();
 
