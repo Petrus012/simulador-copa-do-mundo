@@ -162,6 +162,11 @@ public class SimuladorAnalistasCopaDoMundo {
                 this.analistaAtivo = a;
                 hidratarPalpitesDoAnalistaAtivo();
 
+                if (a.getPalpites().isEmpty()) {
+                    ranking.add(new ItemRankingGeral(a.getNome(), 0));
+                    continue;
+                }
+
                 List<ResultadoPontuacao> resultados = calcularPontuacaoTotal();
                 int pontosPartidas = somarPontuacao(resultados);
                 int bonusGrupo = calcularBonusTotalDeClassificacao();
