@@ -1,0 +1,100 @@
+package br.ufla.copa.core.service;
+
+import br.ufla.copa.core.contracts.RegraDePontuacaoDePalpite;
+import br.ufla.copa.core.model.Partida;
+import br.ufla.copa.core.model.StatusPartida;
+import br.ufla.copa.core.contracts.RegraApostouEmpateNaoFoi;
+import br.ufla.copa.core.contracts.RegraGolsDoPerdedor;
+import br.ufla.copa.core.contracts.RegraGolsDoVencedor;
+import br.ufla.copa.core.contracts.RegraSaldoDeGols;
+import br.ufla.copa.core.contracts.RegraVencedorOuEmpate;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Motor de pontuação extensível (H5).
+ * Mantém uma coleção de regras e as percorre para calcular a pontuação
+ * de um palpite em uma partida, sem nenhuma estrutura if/else sobre
+ * qual regra aplicar — basta adicionar uma nova instância à lista para
+ * que ela passe a ser considerada automaticamente.
+ */
+public class MotorDePontuacao {
+
+    private List<RegraDePontuacaoDePalpite> regras;
+
+    /**
+     * Constrói o motor com o conjunto padrão de regras (R1 a R5).
+     */
+    public MotorDePontuacao() {
+        this.regras = new ArrayList<>();
+        this.regras.add(new RegraVencedorOuEmpate());
+        this.regras.add(new RegraSaldoDeGols());
+        this.regras.add(new RegraGolsDoVencedor());
+        this.regras.add(new RegraGolsDoPerdedor());
+        this.regras.add(new RegraApostouEmpateNaoFoi());
+    }
+
+    /**
+     * Calcula a pontuação obtida em uma partida específica (H5).
+     * Retorna null se a partida não tiver palpite ou não estiver finalizada.
+     *
+     * @param partida a partida a ser avaliada
+     * @return resultado detalhado com pontos por regra, ou null se inaplicável
+     */
+    public ResultadoPontuacao calcularPontuacaoPartida(Partida partida) {
+        if (!partida.temPalpite() || partida.getStatus() != StatusPartida.FINALIZADA) {
+            return null;
+        }
+
+        int palpiteCasa = partida.getPalpite().getGolsTimeCasa();
+        int palpiteVisitante = partida.getPalpite().getGolsTimeVisitante();
+        int oficialCasa = partida.getGolsTimeCasaOficial();
+        int oficialVisitante = partida.getGolsTimeVisitanteOficial();
+
+        ResultadoPontuacao resultado = new ResultadoPontuacao(partida);
+
+        for (RegraDePontuacaoDePalpite regra : regras) {
+            int pontos = regra.calcular(palpiteCasa, palpiteVisitante, oficialCasa, oficialVisitante);
+            resultado.adicionarRegra(regra.getIdentificador(), regra.getDescricao(), pontos);
+        }
+
+        return resultado;
+    }
+
+    /**
+     * Calcula a pontuação total somando todas as partidas com palpite e
+     * resultado oficial (H6). Retorna uma lista de resultados individuais,
+     * um por partida pontuável.
+     *
+     * @param partidas lista completa de partidas
+     * @return lista de ResultadoPontuacao para cada partida avaliável
+     */
+    public List<ResultadoPontuacao> calcularPontuacaoTotal(List<Partida> partidas) {
+        List<ResultadoPontuacao> resultados = new ArrayList<>();
+
+        for (Partida partida : partidas) {
+            ResultadoPontuacao resultado = calcularPontuacaoPartida(partida);
+            if (resultado != null) {
+                resultados.add(resultado);
+            }
+        }
+
+        return resultados;
+    }
+
+    /**
+     * Soma os pontos de uma lista de resultados (H6).
+     */
+    public int somarPontuacao(List<ResultadoPontuacao> resultados) {
+        int total = 0;
+        for (ResultadoPontuacao r : resultados) {
+            total += r.getTotalPontos();
+        }
+        return total;
+    }
+
+    public List<RegraDePontuacaoDePalpite> getRegras() {
+        return regras;
+    }
+}

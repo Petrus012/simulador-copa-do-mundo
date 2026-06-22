@@ -28,9 +28,4 @@ public class Selecao {
         Selecao outraSelecao = (Selecao) obj;
         return Objects.equals(this.nome, outraSelecao.getNome());
     }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(nome);
-    }
 }

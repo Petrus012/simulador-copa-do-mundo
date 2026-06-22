@@ -26,3 +26,5 @@ frontend/generated/
 
 webpack.generated.js
 .vscode/jetty.pid
+
+bin/

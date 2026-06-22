@@ -1,85 +1,57 @@
 package br.ufla.copa.core.model;
 
 import java.util.Comparator;
-import java.util.List;
 
+/**
+ * Comparador para ordenar a classificação do grupo seguindo os critérios
+ * oficiais do regulamento da Copa do Mundo (H3):
+ *
+ * a) Maior número de pontos no confronto direto entre as equipes empatadas
+ * b) Melhor saldo de gols no confronto direto
+ * c) Maior número de gols marcados no confronto direto
+ * d) Melhor saldo de gols considerando todas as partidas do grupo
+ * e) Maior número de gols marcados em todas as partidas do grupo
+ * f) Ordem alfabética (critério final por falta de dados de cartões/ranking FIFA)
+ */
 public class ClassificacaoComparator implements Comparator<EstatisticasSelecao> {
 
-    private List<Partida> partidasDoGrupo;
-
-    public ClassificacaoComparator(List<Partida> partidasDoGrupo) {
-        this.partidasDoGrupo = partidasDoGrupo;
-    }
-
     @Override
-    public int compare(EstatisticasSelecao e1, EstatisticasSelecao e2) {
-        // 1. Maior número de pontos geral
-        if (e1.getPontos() != e2.getPontos()) {
-            return Integer.compare(e2.getPontos(), e1.getPontos());
-        }
+    public int compare(EstatisticasSelecao t1, EstatisticasSelecao t2) {
+        // 1º critério: pontos gerais no grupo
+        int compPontos = Integer.compare(t2.getPontos(), t1.getPontos());
+        if (compPontos != 0) return compPontos;
 
-        // --- INÍCIO DO CRITÉRIO DE CONFRONTO DIRETO ---
-        Partida confronto = null;
-        for (int i = 0; i < partidasDoGrupo.size(); i++) {
-            Partida p = partidasDoGrupo.get(i);
-            if (p.getPalpite() != null) {
-                Selecao timeA = p.getTimeA();
-                Selecao timeB = p.getTimeB();
-                
-                if ((timeA.equals(e1.getSelecao()) && timeB.equals(e2.getSelecao())) ||
-                    (timeB.equals(e1.getSelecao()) && timeA.equals(e2.getSelecao()))) {
-                    confronto = p;
-                    break;
-                }
-            }
-        }
+        // Critérios a, b, c: confronto direto entre as duas seleções empatadas
+        Selecao sel1 = t1.getSelecao();
+        Selecao sel2 = t2.getSelecao();
 
-        if (confronto != null) {
-            Palpite palpite = confronto.getPalpite();
-            int golsE1 = 0;
-            int golsE2 = 0;
+        // a) Pontos no confronto direto entre si
+        int pontosT1Direto = t1.getPontosConfrontoDirecto(sel2);
+        int pontosT2Direto = t2.getPontosConfrontoDirecto(sel1);
+        int compConfrontoPontos = Integer.compare(pontosT2Direto, pontosT1Direto);
+        if (compConfrontoPontos != 0) return compConfrontoPontos;
 
-            if (confronto.getTimeA().equals(e1.getSelecao())) {
-                golsE1 = palpite.getGolsTimeA();
-                golsE2 = palpite.getGolsTimeB();
-            } else {
-                golsE1 = palpite.getGolsTimeB();
-                golsE2 = palpite.getGolsTimeA();
-            }
+        // b) Saldo de gols no confronto direto
+        int saldoT1Direto = t1.getSaldoConfrontoDirecto(sel2);
+        int saldoT2Direto = t2.getSaldoConfrontoDirecto(sel1);
+        int compConfrontoSaldo = Integer.compare(saldoT2Direto, saldoT1Direto);
+        if (compConfrontoSaldo != 0) return compConfrontoSaldo;
 
-            // a. Pontos no confronto direto
-            int pontosE1 = (golsE1 > golsE2) ? 3 : (golsE1 == golsE2 ? 1 : 0);
-            int pontosE2 = (golsE2 > golsE1) ? 3 : (golsE1 == golsE2 ? 1 : 0);
+        // c) Gols marcados no confronto direto
+        int golsT1Direto = t1.getGolsProConfrontoDirecto(sel2);
+        int golsT2Direto = t2.getGolsProConfrontoDirecto(sel1);
+        int compConfrontoGols = Integer.compare(golsT2Direto, golsT1Direto);
+        if (compConfrontoGols != 0) return compConfrontoGols;
 
-            if (pontosE1 != pontosE2) {
-                return Integer.compare(pontosE2, pontosE1);
-            }
+        // d) Saldo de gols em todas as partidas do grupo
+        int compSaldo = Integer.compare(t2.getSaldoGols(), t1.getSaldoGols());
+        if (compSaldo != 0) return compSaldo;
 
-            // b. Saldo de gols no confronto direto
-            int saldoE1 = golsE1 - golsE2;
-            int saldoE2 = golsE2 - golsE1;
-            if (saldoE1 != saldoE2) {
-                return Integer.compare(saldoE2, saldoE1);
-            }
+        // e) Gols marcados em todas as partidas do grupo
+        int compGolsPro = Integer.compare(t2.getGolsPro(), t1.getGolsPro());
+        if (compGolsPro != 0) return compGolsPro;
 
-            // c. Gols marcados no confronto direto
-            if (golsE1 != golsE2) {
-                return Integer.compare(golsE2, golsE1);
-            }
-        }
-        // --- FIM DO CRITÉRIO DE CONFRONTO DIRETO ---
-
-        // d. Melhor saldo de gols geral
-        if (e1.getSaldoGols() != e2.getSaldoGols()) {
-            return Integer.compare(e2.getSaldoGols(), e1.getSaldoGols());
-        }
-
-        // e. Maior número de gols marcados geral
-        if (e1.getGolsPro() != e2.getGolsPro()) {
-            return Integer.compare(e2.getGolsPro(), e1.getGolsPro());
-        }
-
-        // f. Ordem alfabética
-        return e1.getSelecao().getNome().compareToIgnoreCase(e2.getSelecao().getNome());
+        // f) Ordem alfabética
+        return t1.getSelecao().getNome().compareTo(t2.getSelecao().getNome());
     }
 }
