@@ -271,24 +271,31 @@ public class MenuTerminal {
             return;
         }
 
-        System.out.println("\n--- Pontuação Total dos Palpites ---");
+        System.out.println("\n----- PONTUAÇÃO TOTAL DOS PALPITES -----");
         System.out.printf("%-10s | %-30s | %-10s | %-6s%n",
                 "Partida", "Confronto", "Palpite", "Pontos");
-        System.out.println("-----------------------------------------------------------");
+        System.out.println("-----------------------------------------------------------------");
 
         for (ResultadoPontuacao resultado : resultados) {
             Partida p = resultado.getPartida();
             String confronto = p.getTimeDaCasa().getNome() + " x " + p.getTimeVisitante().getNome();
             String palpite = p.getPalpite().getGolsTimeCasa() + " x " + p.getPalpite().getGolsTimeVisitante();
 
-            System.out.printf("%-10d | %-30s | %-10s | %6d%n",
+            System.out.printf("%-10d | %-35s | %-10s | %6d%n",
                     p.getId(),
                     confronto,
                     palpite,
                     resultado.getTotalPontos());
         }
 
-        System.out.println("-----------------------------------------------------------");
-        System.out.printf("%-55s %6d pts%n", "PONTUAÇÃO TOTAL:", simulador.somarPontuacao(resultados));
+        int totalPartidas = simulador.somarPontuacao(resultados);
+        int totalBonus = simulador.calcularBonusTotalDeClassificacao();
+        int prestigioGeral = totalPartidas + totalBonus;
+
+        System.out.println("\n-----------------------------------------------------------------");
+        System.out.printf("%-45s %6d pts%n", "PONTUAÇÃO DAS PARTIDAS:", totalPartidas);
+        System.out.printf("%-45s %6d pts%n", "BÔNUS DE CLASSIFICAÇÃO (H07):", totalBonus);
+        System.out.println("-----------------------------------------------------------------");
+        System.out.printf("%-45s %6d pts%n", "PRESTÍGIO TOTAL ACUMULADO:", prestigioGeral);
     }
 }
