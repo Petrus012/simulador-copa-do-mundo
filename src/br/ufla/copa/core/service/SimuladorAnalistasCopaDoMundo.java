@@ -1,16 +1,20 @@
 package br.ufla.copa.core.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import br.ufla.copa.core.data.CarregadorDeDados;
+import br.ufla.copa.core.model.Analista;
 import br.ufla.copa.core.model.EstatisticasSelecao;
 import br.ufla.copa.core.model.Grupo;
+import br.ufla.copa.core.model.Palpite;
 import br.ufla.copa.core.model.Partida;
 import br.ufla.copa.core.model.Estadio;
 
 /**
  * Fachada principal do sistema (Padrão Singleton + Facade).
- * Conecta a interface do usuário com a camada de dados e os serviços de negócio.
+ * Gerencia o ciclo de vida dos Analistas e aplica o padrão Flyweight (Context Switching)
+ * para hidratar a base global de partidas com os palpites do usuário ativo (H08).
  */
 public class SimuladorAnalistasCopaDoMundo {
 
@@ -19,23 +23,108 @@ public class SimuladorAnalistasCopaDoMundo {
     private CarregadorDeDados carregador;
     private MotorDePontuacao motorDePontuacao;
 
+    // H08: Repositório em memória dos analistas e ponteiro do usuário logado
+    private List<Analista> analistas;
+    private Analista analistaAtivo;
+
     /**
      * Construtor privado — padrão Singleton.
-     * Já inicializa o carregador de dados (partidas) e o motor de pontuação.
+     * Já inicializa um analista padrão ("Júlio") para o sistema não nascer órfão.
      */
     private SimuladorAnalistasCopaDoMundo() {
         this.carregador = new CarregadorDeDados();
         this.motorDePontuacao = new MotorDePontuacao();
+
+        this.analistas = new ArrayList<>();
+        Analista padrao = new Analista("Júlio");
+        this.analistas.add(padrao);
+        this.analistaAtivo = padrao;
     }
 
-    /**
-     * Retorna a instância única da classe (Padrão Singleton).
-     */
     public static SimuladorAnalistasCopaDoMundo getInstance() {
         if (instancia == null) {
             instancia = new SimuladorAnalistasCopaDoMundo();
         }
         return instancia;
+    }
+
+    // -----------------------------------------------------------------------
+    // H08: GERENCIAMENTO DE ANALISTAS E TROCA DE CONTEXTO (FLYWEIGHT)
+    // -----------------------------------------------------------------------
+
+    public Analista getAnalistaAtivo() {
+        return analistaAtivo;
+    }
+
+    public List<Analista> getAnalistas() {
+        return analistas;
+    }
+
+    /**
+     * Motor Flyweight: Limpa os palpites das Partidas globais e pendura 
+     * estritamente os palpites guardados no cofre do Analista Ativo.
+     */
+    public void hidratarPalpitesDoAnalistaAtivo() {
+        if (analistaAtivo == null) return;
+
+        for (Partida p : carregador.getPartidas()) {
+            // 1. Limpa o palco
+            p.setPalpite(null);
+
+            // 2. Veste a roupa do usuário logado se ele tiver dado palpite pra esse jogo
+            Palpite palpiteDoCofre = analistaAtivo.getPalpitePara(p.getId());
+            if (palpiteDoCofre != null) {
+                p.setPalpite(palpiteDoCofre);
+            }
+        }
+    }
+
+    /**
+     * Cadastra um novo analista. Retorna false se o nome já existir.
+     */
+    public boolean cadastrarAnalista(String nome) {
+        if (nome == null || nome.trim().isEmpty()) return false;
+        String nomeLimpo = nome.trim();
+
+        for (Analista a : analistas) {
+            if (a.getNome().equalsIgnoreCase(nomeLimpo)) {
+                return false; // Nome já em uso
+            }
+        }
+
+        Analista novo = new Analista(nomeLimpo);
+        this.analistas.add(novo);
+        this.analistaAtivo = novo;
+        hidratarPalpitesDoAnalistaAtivo(); // Limpa as partidas da tela pro novato
+        return true;
+    }
+
+    /**
+     * Altera o usuário ativo do sistema e engatilha a hidratação visual.
+     */
+    public boolean selecionarAnalista(String nome) {
+        if (nome == null || nome.trim().isEmpty()) return false;
+        String nomeLimpo = nome.trim();
+
+        for (Analista a : analistas) {
+            if (a.getNome().equalsIgnoreCase(nomeLimpo)) {
+                this.analistaAtivo = a;
+                hidratarPalpitesDoAnalistaAtivo(); // Carrega os palpites desse cara na tela
+                return true;
+            }
+        }
+        return false; // Analista não encontrado
+    }
+
+    /**
+     * Ponto de injeção para o leitor de arquivos binários.
+     */
+    public void carregarRepositorioDeAnalistas(List<Analista> listaRecuperada) {
+        if (listaRecuperada != null && !listaRecuperada.isEmpty()) {
+            this.analistas = listaRecuperada;
+            this.analistaAtivo = listaRecuperada.get(0);
+            hidratarPalpitesDoAnalistaAtivo();
+        }
     }
 
     // -----------------------------------------------------------------------
@@ -73,17 +162,22 @@ public class SimuladorAnalistasCopaDoMundo {
     // -----------------------------------------------------------------------
 
     /**
-     * Importa palpites de um arquivo CSV (H2).
-     * @return quantidade de palpites importados com sucesso
+     * Importa palpites do CSV (H2) e SALVA uma cópia no cofre do Analista Ativo (H8).
      */
     public int importarPalpites(String caminhoArquivo) {
-        return carregador.importarPalpites(caminhoArquivo);
+        int qtdImportada = carregador.importarPalpites(caminhoArquivo);
+        
+        // Interceptador H08: O que entrou na partida global, vai pro cofre do cara
+        if (analistaAtivo != null) {
+            for (Partida p : carregador.getPartidas()) {
+                if (p.temPalpite()) {
+                    analistaAtivo.registrarPalpite(p.getId(), p.getPalpite());
+                }
+            }
+        }
+        return qtdImportada;
     }
 
-    /**
-     * Importa resultados oficiais de um arquivo CSV (H4).
-     * Partidas importadas ficam com status FINALIZADA e passam a bloquear novos palpites.
-     */
     public void importarResultadosOficiais(String caminhoArquivo) {
         carregador.importarResultadosOficiais(caminhoArquivo);
     }
@@ -92,10 +186,6 @@ public class SimuladorAnalistasCopaDoMundo {
     // Classificação (H3 / H4)
     // -----------------------------------------------------------------------
 
-    /**
-     * Retorna a tabela de classificação já calculada e ordenada de um grupo.
-     * Usa resultados oficiais quando disponíveis; palpites caso contrário.
-     */
     public List<EstatisticasSelecao> obterClassificacaoGrupo(char nomeGrupo) {
         Grupo grupoEncontrado = buscarGrupo(nomeGrupo);
         if (grupoEncontrado == null) {
@@ -105,13 +195,9 @@ public class SimuladorAnalistasCopaDoMundo {
     }
 
     // -----------------------------------------------------------------------
-    // Pontuação de palpites (H5 e H6)
+    // Pontuação de palpites (H5, H6 e H7)
     // -----------------------------------------------------------------------
 
-    /**
-     * Calcula a pontuação detalhada do palpite em uma partida específica (H5).
-     * Retorna null se a partida não tiver palpite ou não estiver finalizada.
-     */
     public ResultadoPontuacao calcularPontuacaoPartida(int idPartida) {
         Partida partida = buscarPartidaPorId(idPartida);
         if (partida == null) {
@@ -120,24 +206,14 @@ public class SimuladorAnalistasCopaDoMundo {
         return motorDePontuacao.calcularPontuacaoPartida(partida);
     }
 
-    /**
-     * Calcula a pontuação de todos os palpites sobre partidas finalizadas (H6).
-     * @return lista de ResultadoPontuacao, uma entrada por partida pontuável
-     */
     public List<ResultadoPontuacao> calcularPontuacaoTotal() {
         return motorDePontuacao.calcularPontuacaoTotal(carregador.getPartidas());
     }
 
-    /**
-     * Soma os pontos de uma lista de resultados (H6).
-     */
     public int somarPontuacao(List<ResultadoPontuacao> resultados) {
         return motorDePontuacao.somarPontuacao(resultados);
     }
 
-    /**
-     * Calcula o bônus acumulado de todos os grupos da Copa (H07).
-     */
     public int calcularBonusTotalDeClassificacao() {
         int totalBonus = 0;
         for (Grupo g : buscarGrupos()) {
@@ -145,5 +221,4 @@ public class SimuladorAnalistasCopaDoMundo {
         }
         return totalBonus;
     }
-    
 }
