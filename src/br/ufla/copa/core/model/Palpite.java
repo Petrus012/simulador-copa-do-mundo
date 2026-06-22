@@ -1,6 +1,10 @@
 package br.ufla.copa.core.model;
 
-public class Palpite {
+import java.io.Serializable;
+
+public class Palpite implements Serializable {
+    private static final long serialVersionUID = 1L; // Blindagem de versão do arquivo binário
+
     private final int golsTimeCasa;
     private final int golsTimeVisitante;
 
