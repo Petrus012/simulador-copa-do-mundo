@@ -152,34 +152,34 @@ Neste projeto inicial:
 
 |  Id |  Descrição                                                  |  Implementada     | 
 |-----|-------------------------------------------------------------|-------------------|
-| H01 | Inicialização da Tabela de Partidas                         | (sim/não/parcial) |
-| H02 | Registro de Palpites                                        | (sim/não/parcial) |
-| H03 | Tabela de Classificação do Grupo                            | (sim/não/parcial) |
-| H04 | Carregamento dos Resultados Oficiais                        | (sim/não/parcial) |
-| H05 | Pontuação do Palpite de Uma Partida                         | (sim/não/parcial) |
-| H06 | Pontuação de Todos os Palpites                              | (sim/não/parcial) |
-| H07 | Pontuação pela Classificação na primeira fase               | (sim/não/parcial) |
-| H08 | Criação de Perfil de Analista e Persistência dos Palpites   | (sim/não/parcial) |
-| H09 | Ranking Geral de Prestígio                                  | (sim/não/parcial) |
-| H10 | Sincronização Online de Resultados Oficiais                 | (sim/não/parcial) |
-| H11 | Diagrama de Classes Simplificado e Checklist                | (sim/não/parcial) |
-| H12 | Dashboard de Jogos e Resultados Oficiais                    | (sim/não/parcial) |
-| H13 | Registro de Palpites via Web                                | (sim/não/parcial) |
-| H14 | Ranking Comparativo de Analistas                            | (sim/não/parcial) |
-| H15 | Atualização do Diagrama de Classes Simplificado e Checklist | (sim/não/parcial) |
+| H01 | Inicialização da Tabela de Partidas                         | sim               |
+| H02 | Registro de Palpites                                        | sim               |
+| H03 | Tabela de Classificação do Grupo                            | sim               |
+| H04 | Carregamento dos Resultados Oficiais                        | sim               |
+| H05 | Pontuação do Palpite de Uma Partida                         | sim               |
+| H06 | Pontuação de Todos os Palpites                              | sim               |
+| H07 | Pontuação pela Classificação na primeira fase               | não               |
+| H08 | Criação de Perfil de Analista e Persistência dos Palpites   | não               |
+| H09 | Ranking Geral de Prestígio                                  | não               |
+| H10 | Sincronização Online de Resultados Oficiais                 | não               |
+| H11 | Diagrama de Classes Simplificado e Checklist                | não               |
+| H12 | Dashboard de Jogos e Resultados Oficiais                    | não               |
+| H13 | Registro de Palpites via Web                                | não               |
+| H14 | Ranking Comparativo de Analistas                            | não               |
+| H15 | Atualização do Diagrama de Classes Simplificado e Checklist | não               |
 
 **Requisitos de OO**
 
 |  Descrição                                           |  Respostas | 
 |------------------------------------------------------|------------|
-| Usa corretamente conceitos básicos de OO             | (sim/não)  |  
-| Usa corretamente encapsulamento                      | (sim/não)  |
-| Usa corretamente composição, agregação e associação  | (sim/não)  |
-| Tem bom design de classes                            | (sim/não)  |
-| Tem divisão de camadas                               | (sim/não)  |
-| Usa corretamente herança                             | (sim/não)  |
-| Usa corretamente polimorfismo                        | (sim/não)  |
-| Usa tratamento de exceçãos                           | (sim/não)  | 
-| Usa Java versão 21                                   | (sim/não)  |
-| Código compila                                       | (sim/não)  |
-| Código está organizado, legível e bem comentado      | (sim/não)  |
+| Usa corretamente conceitos básicos de OO             | sim        |  
+| Usa corretamente encapsulamento                      | sim        |
+| Usa corretamente composição, agregação e associação  | sim        |
+| Tem bom design de classes                            | sim        |
+| Tem divisão de camadas                               | sim        |
+| Usa corretamente herança                             | sim        |
+| Usa corretamente polimorfismo                        | sim        |
+| Usa tratamento de exceçãos                           | sim        | 
+| Usa Java versão 21                                   | sim        |
+| Código compila                                       | sim        |
+| Código está organizado, legível e bem comentado      | sim        |
