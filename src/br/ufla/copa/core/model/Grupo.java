@@ -110,4 +110,44 @@ public class Grupo {
         }
         return null;
     }
+
+    /**
+     * H07: Retorna a classificação do grupo calculada ESTRITAMENTE pelos palpites,
+     * ignorando os placares oficiais mesmo que a partida já esteja finalizada.
+     * Instancia uma lista temporária para não poluir a classificação oficial do grupo.
+     */
+    public List<EstatisticasSelecao> getClassificacaoPelosPalpites() {
+        List<EstatisticasSelecao> statsPalpite = new ArrayList<>();
+        for (Selecao s : selecoes) {
+            statsPalpite.add(new EstatisticasSelecao(s));
+        }
+
+        for (Partida p : partidas) {
+            if (!p.temPalpite()) continue;
+
+            EstatisticasSelecao casa = buscarEstatisticasNaLista(statsPalpite, p.getTimeDaCasa());
+            EstatisticasSelecao visitante = buscarEstatisticasNaLista(statsPalpite, p.getTimeVisitante());
+
+            if (casa == null || visitante == null) continue;
+
+            int golsCasa = p.getPalpite().getGolsTimeCasa();
+            int golsVisitante = p.getPalpite().getGolsTimeVisitante();
+
+            casa.registrarResultado(golsCasa, golsVisitante);
+            visitante.registrarResultado(golsVisitante, golsCasa);
+
+            casa.registrarConfrontoDirecto(p.getTimeVisitante(), golsCasa, golsVisitante);
+            visitante.registrarConfrontoDirecto(p.getTimeDaCasa(), golsVisitante, golsCasa);
+        }
+
+        statsPalpite.sort(new ClassificacaoComparator());
+        return statsPalpite;
+    }
+
+    private EstatisticasSelecao buscarEstatisticasNaLista(List<EstatisticasSelecao> lista, Selecao selecao) {
+        for (EstatisticasSelecao es : lista) {
+            if (es.getSelecao().equals(selecao)) return es;
+        }
+        return null;
+    }
 }
