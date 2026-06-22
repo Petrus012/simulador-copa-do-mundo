@@ -61,7 +61,7 @@ public class MenuTerminal {
         System.out.println("7  - Pontuação Total Acumulada");
         System.out.println("8  - Cadastrar Novo Analista");
         System.out.println("9  - Mudar de Analista Ativo");
-        System.out.println("10 - Salvar Estado e Sair");
+        System.out.println("10 - Sair");
     }
 
     private void tratarMenu(int opcao) {
@@ -94,9 +94,8 @@ public class MenuTerminal {
                 mudarAnalistaAtivo();
                 break;
             case 10:
-                System.out.println("\nGravando Memory Card no HD...");
                 simulador.salvarEstadoDoSistema();
-                System.out.println("Sessão salva com sucesso. Até a próxima!");
+                System.out.println("\nSaindo do simulador. Até a próxima!");
                 break;
             default:
                 System.out.println("Opção inválida! Escolha entre 1 e 10.");
