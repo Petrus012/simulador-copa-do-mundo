@@ -35,6 +35,9 @@ public class SimuladorAnalistasCopaDoMundo {
         this.carregador = new CarregadorDeDados();
         this.motorDePontuacao = new MotorDePontuacao();
 
+        // Tenta baixar os resultados reais da Web silenciosamente no boot
+        this.carregador.sincronizarResultadosOnline();
+
         // Tenta puxar o Memory Card do HD
         List<Analista> salvos = carregador.carregarAnalistasDoHD();
         if (salvos != null && !salvos.isEmpty()) {
@@ -76,10 +79,8 @@ public class SimuladorAnalistasCopaDoMundo {
         if (analistaAtivo == null) return;
 
         for (Partida p : carregador.getPartidas()) {
-            // 1. Limpa o palco
             p.setPalpite(null);
 
-            // 2. Veste a roupa do usuário logado se ele tiver dado palpite pra esse jogo
             Palpite palpiteDoCofre = analistaAtivo.getPalpitePara(p.getId());
             if (palpiteDoCofre != null) {
                 p.setPalpite(palpiteDoCofre);
