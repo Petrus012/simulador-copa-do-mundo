@@ -7,6 +7,7 @@ import br.ufla.copa.core.model.Estadio;
 import br.ufla.copa.core.model.Grupo;
 import br.ufla.copa.core.model.Partida;
 import br.ufla.copa.core.model.EstatisticasSelecao;
+import br.ufla.copa.core.service.ItemRankingGeral;
 import br.ufla.copa.core.service.ResultadoPontuacao;
 import br.ufla.copa.core.service.SimuladorAnalistasCopaDoMundo;
 
@@ -41,7 +42,8 @@ public class MenuTerminal {
                 System.out.println("Ocorreu um erro inesperado: " + e.getMessage());
             }
 
-        } while (opcao != 10);
+        // H09: Loop expandido para 11 opções
+        } while (opcao != 11);
     }
 
     private void exibirMenu() {
@@ -49,19 +51,20 @@ public class MenuTerminal {
                 ? simulador.getAnalistaAtivo().getNome() 
                 : "Nenhum";
 
-        System.out.println("\n------------------------------------------------------------------------------");
+        System.out.println("\n==============================================================================");
         System.out.println("--- SIMULADOR DA COPA DO MUNDO 2026  |  Analista logado: [" + nomeAtivo + "] ---");
-        System.out.println("------------------------------------------------------------------------------");
+        System.out.println("==============================================================================");
         System.out.println("1  - Exibir Estádios");
         System.out.println("2  - Exibir Partidas por Grupo");
         System.out.println("3  - Importar Palpites (Registra no cofre do analista atual)");
         System.out.println("4  - Importar Resultados Oficiais");
         System.out.println("5  - Exibir Tabela de Classificação do Grupo");
         System.out.println("6  - Pontuação de Uma Partida");
-        System.out.println("7  - Pontuação Total Acumulada");
-        System.out.println("8  - Cadastrar Novo Analista");
-        System.out.println("9  - Mudar de Analista Ativo");
-        System.out.println("10 - Sair");
+        System.out.println("7  - Pontuação Total Acumulada do Analista Atual");
+        System.out.println("8  - Exibir Ranking Geral de Prestígio (H09)");
+        System.out.println("9  - Cadastrar Novo Analista");
+        System.out.println("10 - Mudar de Analista Ativo");
+        System.out.println("11 - Sair");
     }
 
     private void tratarMenu(int opcao) {
@@ -88,20 +91,55 @@ public class MenuTerminal {
                 exibirPontuacaoTotal();
                 break;
             case 8:
-                cadastrarNovoAnalista();
+                exibirRankingGeral();
                 break;
             case 9:
-                mudarAnalistaAtivo();
+                cadastrarNovoAnalista();
                 break;
             case 10:
+                mudarAnalistaAtivo();
+                break;
+            case 11:
                 simulador.salvarEstadoDoSistema();
                 System.out.println("\nSaindo do simulador. Até a próxima!");
                 break;
             default:
-                System.out.println("Opção inválida! Escolha entre 1 e 10.");
+                System.out.println("Opção inválida! Escolha entre 1 e 11.");
                 break;
         }
     }
+
+    // -----------------------------------------------------------------------
+    // H09 — Ranking Geral de Prestígio
+    // -----------------------------------------------------------------------
+
+    private void exibirRankingGeral() {
+        List<ItemRankingGeral> ranking = simulador.obterRankingGeralOrdenado();
+
+        if (ranking.isEmpty()) {
+            System.out.println("\nNenhum analista cadastrado no sistema.");
+            return;
+        }
+
+        System.out.println("\n==============================================================================");
+        System.out.println("------------------------- RANKING GERAL DE PRESTÍGIO -------------------------");
+        System.out.println("==============================================================================");
+        System.out.printf("%-5s | %-42s | %-15s%n", "Pos", "Analista Esportivo", "Prestígio Total");
+        System.out.println("------------------------------------------------------------------------------");
+
+        for (int i = 0; i < ranking.size(); i++) {
+            ItemRankingGeral item = ranking.get(i);
+            System.out.printf("%2dº   | %-42s | %10d pts%n",
+                    (i + 1),
+                    item.getNomeAnalista(),
+                    item.getPontuacaoTotal());
+        }
+        System.out.println("==============================================================================");
+    }
+
+    // -----------------------------------------------------------------------
+    // H08 — Interface de Troca de Contexto e Cadastro
+    // -----------------------------------------------------------------------
 
     private void mudarAnalistaAtivo() {
         List<Analista> lista = simulador.getAnalistas();
@@ -141,6 +179,10 @@ public class MenuTerminal {
             System.out.println("\n[ERRO] Já existe um analista cadastrado com o nome '" + novoNome + "'.");
         }
     }
+
+    // -----------------------------------------------------------------------
+    // H1 a H7 — Consultas e Cargas
+    // -----------------------------------------------------------------------
 
     private void exibirEstadios() {
         List<Estadio> listaEstadios = simulador.buscarEstadios();
