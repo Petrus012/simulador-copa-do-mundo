@@ -1,6 +1,8 @@
 package br.ufla.copa.core.service;
 
 import br.ufla.copa.core.contracts.RegraDePontuacaoDePalpite;
+import br.ufla.copa.core.model.EstatisticasSelecao;
+import br.ufla.copa.core.model.Grupo;
 import br.ufla.copa.core.model.Partida;
 import br.ufla.copa.core.model.StatusPartida;
 import br.ufla.copa.core.contracts.RegraApostouEmpateNaoFoi;
@@ -8,6 +10,9 @@ import br.ufla.copa.core.contracts.RegraGolsDoPerdedor;
 import br.ufla.copa.core.contracts.RegraGolsDoVencedor;
 import br.ufla.copa.core.contracts.RegraSaldoDeGols;
 import br.ufla.copa.core.contracts.RegraVencedorOuEmpate;
+import br.ufla.copa.core.contracts.RegraDePontuacaoDeClassificacao;
+import br.ufla.copa.core.contracts.RegraPosicaoFinal;
+import br.ufla.copa.core.model.Selecao;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,4 +102,45 @@ public class MotorDePontuacao {
     public List<RegraDePontuacaoDePalpite> getRegras() {
         return regras;
     }
+
+    /**
+     * Calcula o bônus total de Posição Final de um Grupo (H07).
+     * Retorna 0 se o grupo tiver ao menos uma partida não finalizada ("Tudo ou Nada").
+     */
+    public int calcularBonusDoGrupo(Grupo grupo) {
+        // Regra de segurança da H7: Todos os jogos do grupo têm que estar finalizados
+        for (Partida p : grupo.getPartidas()) {
+            if (p.getStatus() != StatusPartida.FINALIZADA) {
+                return 0; 
+            }
+        }
+
+        List<EstatisticasSelecao> oficial = grupo.getClassificacao();
+        List<EstatisticasSelecao> palpitada = grupo.getClassificacaoPelosPalpites();
+
+        int totalBonusGrupo = 0;
+        RegraDePontuacaoDeClassificacao regraPosicao = new RegraPosicaoFinal();
+
+        // Compara os 3 primeiros colocados (índices 0, 1 e 2)
+        for (int i = 0; i < Math.min(3, Math.min(oficial.size(), palpitada.size())); i++) {
+            Selecao selecaoOficial = oficial.get(i).getSelecao();
+
+            int posicaoNoPalpite = buscarPosicaoDaSelecao(palpitada, selecaoOficial);
+
+            // Passamos (i + 1) porque a interface do professor exige posição humana (1º, 2º, 3º)
+            totalBonusGrupo += regraPosicao.calcularPontosPorPosicao(posicaoNoPalpite, (i + 1));
+        }
+
+        return totalBonusGrupo;
+    }
+
+    private int buscarPosicaoDaSelecao(List<EstatisticasSelecao> lista, Selecao alvo) {
+        for (int i = 0; i < lista.size(); i++) {
+            if (lista.get(i).getSelecao().equals(alvo)) {
+                return (i + 1);
+            }
+        }
+        return -1;
+    }
+
 }

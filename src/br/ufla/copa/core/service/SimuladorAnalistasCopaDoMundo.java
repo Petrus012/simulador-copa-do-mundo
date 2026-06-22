@@ -134,4 +134,16 @@ public class SimuladorAnalistasCopaDoMundo {
     public int somarPontuacao(List<ResultadoPontuacao> resultados) {
         return motorDePontuacao.somarPontuacao(resultados);
     }
+
+    /**
+     * Calcula o bônus acumulado de todos os grupos da Copa (H07).
+     */
+    public int calcularBonusTotalDeClassificacao() {
+        int totalBonus = 0;
+        for (Grupo g : buscarGrupos()) {
+            totalBonus += motorDePontuacao.calcularBonusDoGrupo(g);
+        }
+        return totalBonus;
+    }
+    
 }
