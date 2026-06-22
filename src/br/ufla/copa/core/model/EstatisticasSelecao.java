@@ -1,5 +1,13 @@
 package br.ufla.copa.core.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Armazena as estatísticas de uma seleção em um grupo.
+ * Além das estatísticas gerais, mantém estatísticas de confronto
+ * direto contra cada adversário, necessárias para o desempate (H3).
+ */
 public class EstatisticasSelecao {
     private Selecao selecao;
     private int pontos;
@@ -7,14 +15,30 @@ public class EstatisticasSelecao {
     private int saldoGols;
     private int golsPro;
 
+    // Estatísticas de confronto direto contra adversários específicos
+    // Cada entrada é um par [EstatisticasSelecao do adversário, pontos no confronto]
+    // Usamos listas paralelas para evitar lambdas/Map com generics complexos
+    private List<Selecao> adversariosConfrontoDirecto;
+    private List<Integer> pontosConfrontoDirecto;
+    private List<Integer> saldoConfrontoDirecto;
+    private List<Integer> golsProConfrontoDirecto;
+
     public EstatisticasSelecao(Selecao selecao) {
         this.selecao = selecao;
         this.pontos = 0;
         this.vitorias = 0;
         this.saldoGols = 0;
         this.golsPro = 0;
+
+        this.adversariosConfrontoDirecto = new ArrayList<>();
+        this.pontosConfrontoDirecto = new ArrayList<>();
+        this.saldoConfrontoDirecto = new ArrayList<>();
+        this.golsProConfrontoDirecto = new ArrayList<>();
     }
 
+    /**
+     * Registra o resultado de uma partida geral do grupo.
+     */
     public void registrarResultado(int golsFeitos, int golsSofridos) {
         this.golsPro += golsFeitos;
         this.saldoGols += (golsFeitos - golsSofridos);
@@ -25,6 +49,70 @@ public class EstatisticasSelecao {
         } else if (golsFeitos == golsSofridos) {
             this.pontos += 1;
         }
+    }
+
+    /**
+     * Registra o resultado de um confronto direto contra um adversário específico.
+     * Usado para calcular os critérios de desempate a, b e c do regulamento.
+     */
+    public void registrarConfrontoDirecto(Selecao adversario, int golsFeitos, int golsSofridos) {
+        int indice = buscarIndiceAdversario(adversario);
+
+        int pontosPartida = 0;
+        int saldoPartida = golsFeitos - golsSofridos;
+
+        if (golsFeitos > golsSofridos) {
+            pontosPartida = 3;
+        } else if (golsFeitos == golsSofridos) {
+            pontosPartida = 1;
+        }
+
+        if (indice == -1) {
+            adversariosConfrontoDirecto.add(adversario);
+            pontosConfrontoDirecto.add(pontosPartida);
+            saldoConfrontoDirecto.add(saldoPartida);
+            golsProConfrontoDirecto.add(golsFeitos);
+        } else {
+            pontosConfrontoDirecto.set(indice, pontosConfrontoDirecto.get(indice) + pontosPartida);
+            saldoConfrontoDirecto.set(indice, saldoConfrontoDirecto.get(indice) + saldoPartida);
+            golsProConfrontoDirecto.set(indice, golsProConfrontoDirecto.get(indice) + golsFeitos);
+        }
+    }
+
+    /**
+     * Retorna os pontos obtidos no confronto direto contra uma seleção específica.
+     */
+    public int getPontosConfrontoDirecto(Selecao adversario) {
+        int indice = buscarIndiceAdversario(adversario);
+        if (indice == -1) return 0;
+        return pontosConfrontoDirecto.get(indice);
+    }
+
+    /**
+     * Retorna o saldo de gols no confronto direto contra uma seleção específica.
+     */
+    public int getSaldoConfrontoDirecto(Selecao adversario) {
+        int indice = buscarIndiceAdversario(adversario);
+        if (indice == -1) return 0;
+        return saldoConfrontoDirecto.get(indice);
+    }
+
+    /**
+     * Retorna os gols marcados no confronto direto contra uma seleção específica.
+     */
+    public int getGolsProConfrontoDirecto(Selecao adversario) {
+        int indice = buscarIndiceAdversario(adversario);
+        if (indice == -1) return 0;
+        return golsProConfrontoDirecto.get(indice);
+    }
+
+    private int buscarIndiceAdversario(Selecao adversario) {
+        for (int i = 0; i < adversariosConfrontoDirecto.size(); i++) {
+            if (adversariosConfrontoDirecto.get(i).equals(adversario)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     public Selecao getSelecao() {

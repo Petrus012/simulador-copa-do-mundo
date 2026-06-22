@@ -3,5 +3,6 @@
     "java.project.sourcePaths": [
         "src"
     ],
-    "java.project.outputPath": "target/classes"
+    "java.project.outputPath": "target/classes",
+    "java.compile.nullAnalysis.mode": "disabled"
 }
