@@ -1,4 +1,6 @@
-package br.ufla.copa.core.contracts;
+package br.ufla.copa.core.rules;
+
+import br.ufla.copa.core.contracts.RegraDePontuacaoDeClassificacao;
 
 /**
  * Regra de pontuação que bonifica o analista pelo acerto da posição exata
