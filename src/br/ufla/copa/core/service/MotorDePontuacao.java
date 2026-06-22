@@ -8,6 +8,7 @@ import br.ufla.copa.core.model.StatusPartida;
 import br.ufla.copa.core.rules.RegraApostouEmpateNaoFoi;
 import br.ufla.copa.core.rules.RegraGolsDoPerdedor;
 import br.ufla.copa.core.rules.RegraGolsDoVencedor;
+import br.ufla.copa.core.rules.RegraPlacarExatoEmpate;
 import br.ufla.copa.core.rules.RegraPosicaoFinal;
 import br.ufla.copa.core.rules.RegraSaldoDeGols;
 import br.ufla.copa.core.rules.RegraVencedorOuEmpate;
@@ -38,6 +39,7 @@ public class MotorDePontuacao {
         this.regras.add(new RegraGolsDoVencedor());
         this.regras.add(new RegraGolsDoPerdedor());
         this.regras.add(new RegraApostouEmpateNaoFoi());
+        this.regras.add(new RegraPlacarExatoEmpate()); 
     }
 
     /**
