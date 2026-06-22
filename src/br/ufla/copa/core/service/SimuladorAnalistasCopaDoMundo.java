@@ -143,6 +143,45 @@ public class SimuladorAnalistasCopaDoMundo {
         }
     }
 
+    /**
+     * H09: Gera o ranking de todos os analistas ordenado por prestígio decrescente.
+     * Utiliza o padrão Snapshot (try-finally) para garantir a restauração do usuário ativo.
+     */
+    public List<ItemRankingGeral> obterRankingGeralOrdenado() {
+        List<ItemRankingGeral> ranking = new ArrayList<>();
+        if (analistas == null || analistas.isEmpty()) {
+            return ranking;
+        }
+
+        // 1. Tira a "foto" do crachá do usuário atual (Snapshot)
+        Analista analistaOriginal = this.analistaAtivo;
+
+        try {
+            // 2. Faz um tour vestindo a roupa de cada analista da base
+            for (Analista a : analistas) {
+                this.analistaAtivo = a;
+                hidratarPalpitesDoAnalistaAtivo();
+
+                List<ResultadoPontuacao> resultados = calcularPontuacaoTotal();
+                int pontosPartidas = somarPontuacao(resultados);
+                int bonusGrupo = calcularBonusTotalDeClassificacao();
+                
+                int prestigioFinal = pontosPartidas + bonusGrupo;
+
+                ranking.add(new ItemRankingGeral(a.getNome(), prestigioFinal));
+            }
+        } finally {
+            // 3. O bloco finally GARANTE que, mesmo que a matemática de algum analista 
+            // dê erro no meio do laço, o usuário original receberá sua roupa de volta.
+            this.analistaAtivo = analistaOriginal;
+            hidratarPalpitesDoAnalistaAtivo();
+        }
+
+        java.util.Collections.sort(ranking);
+
+        return ranking;
+    }
+
     // -----------------------------------------------------------------------
     // Consultas de dados
     // -----------------------------------------------------------------------
