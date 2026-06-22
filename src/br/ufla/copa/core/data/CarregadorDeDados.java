@@ -1,11 +1,11 @@
 package br.ufla.copa.core.data;
 
 import br.ufla.copa.core.model.Analista;
-import br.ufla.copa.core.model.Grupo;
 import br.ufla.copa.core.model.Estadio;
-import br.ufla.copa.core.model.Selecao;
-import br.ufla.copa.core.model.Partida;
+import br.ufla.copa.core.model.Grupo;
 import br.ufla.copa.core.model.Palpite;
+import br.ufla.copa.core.model.Partida;
+import br.ufla.copa.core.model.Selecao;
 import br.ufla.copa.core.model.StatusPartida;
 
 import java.io.BufferedReader;
@@ -14,9 +14,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,6 +30,10 @@ public class CarregadorDeDados {
     private static final String CAMINHO_PARTIDAS = "src/resources/partidas.csv";
     private static final String CAMINHO_ANALISTAS_BIN = "src/resources/analistas.dat";
     
+    // H10: Constantes para a requisição HTTP
+    private static final String URL_RESULTADOS_WEB = "https://raw.githubusercontent.com/caburu/atualizador-resultados-partidas/main/resultados.csv";
+    private static final String CAMINHO_WEB_CACHE = "src/resources/resultados_web_cache.csv";
+
     private List<Grupo> grupos;
     private List<Estadio> estadios;
     private List<Selecao> selecoes;
@@ -40,39 +49,71 @@ public class CarregadorDeDados {
     }
 
     // -----------------------------------------------------------------------
-    // H08: PERSISTÊNCIA BINÁRIA DOS ANALISTAS 
+    // H10: SINCRONIZAÇÃO VIA REDE
     // -----------------------------------------------------------------------
 
     /**
-     * Grava a lista completa de analistas e seus palpites no HD.
+     * Conecta à URL remota, baixa o CSV mais recente para um arquivo temporário 
+     * local e engatilha a atualização oficial das partidas.
      */
+    public void sincronizarResultadosOnline() {
+        try {
+            // Configura timeout de 5s para o boot não travar se o GitHub cair
+            HttpClient cliente = HttpClient.newBuilder()
+                    .connectTimeout(Duration.ofSeconds(5))
+                    .build();
+
+            HttpRequest requisicao = HttpRequest.newBuilder()
+                    .uri(URI.create(URL_RESULTADOS_WEB))
+                    .GET()
+                    .build();
+
+            Path caminhoDestino = Path.of(CAMINHO_WEB_CACHE);
+
+            // Baixa o arquivo da internet direto para o HD
+            HttpResponse<Path> resposta = cliente.send(
+                    requisicao, 
+                    HttpResponse.BodyHandlers.ofFile(caminhoDestino)
+            );
+
+            if (resposta.statusCode() == 200) {
+                importarResultadosOficiais(CAMINHO_WEB_CACHE);
+            } else {
+                System.err.println("Aviso H10: Servidor retornou código " + resposta.statusCode() + " na busca online.");
+            }
+
+        } catch (Exception e) {
+            System.err.println("Aviso: Sem conexão com a internet para buscar placares da Web. Mantendo base local.");
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // Persistência Binária (H08)
+    // -----------------------------------------------------------------------
+
     public void salvarAnalistasNoHD(List<Analista> analistas) {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(CAMINHO_ANALISTAS_BIN))) {
             oos.writeObject(analistas);
         } catch (IOException e) {
-            System.err.println("Erro ao salvar Memory Card dos analistas: " + e.getMessage());
+            System.err.println("Erro ao salvar Memory Card: " + e.getMessage());
         }
     }
 
-    /**
-     * Tenta ler o arquivo do HD. Retorna null se for a primeira execução do software.
-     */
     @SuppressWarnings("unchecked")
     public List<Analista> carregarAnalistasDoHD() {
         Path caminho = Path.of(CAMINHO_ANALISTAS_BIN);
-        if (!Files.exists(caminho)) {
-            return null; // O arquivo ainda não nasceu
-        }
+        if (!Files.exists(caminho)) return null; 
 
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(CAMINHO_ANALISTAS_BIN))) {
             return (List<Analista>) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Aviso: Arquivo de analistas corrompido ou de versão antiga. Ignorando...");
             return null;
         }
     }
 
-    // Importação CSV Original (Intocada)
+    // -----------------------------------------------------------------------
+    // Importações originais (H1, H2, H4)
+    // -----------------------------------------------------------------------
 
     public void importarPartidas(String caminhoArquivo) {
         Path caminho = Path.of(caminhoArquivo);
@@ -114,7 +155,7 @@ public class CarregadorDeDados {
         int palpitesRegistrados = 0;
 
         try (BufferedReader leitor = Files.newBufferedReader(caminho, StandardCharsets.UTF_8)) {
-            String linha = leitor.readLine(); // pula o cabeçalho
+            String linha = leitor.readLine(); 
             while ((linha = leitor.readLine()) != null) {
                 if (linha.isBlank()) continue;
 
@@ -133,12 +174,10 @@ public class CarregadorDeDados {
                 if (golsCasa < 0 || golsVis < 0) continue;
 
                 Partida partida = buscarPartidaPorId(idPartida);
-                if (partida != null) {
-                    if (partida.getStatus() != StatusPartida.FINALIZADA) {
-                        Palpite palpite = new Palpite(golsCasa, golsVis);
-                        partida.setPalpite(palpite);
-                        palpitesRegistrados++;
-                    }
+                if (partida != null && partida.getStatus() != StatusPartida.FINALIZADA) {
+                    Palpite palpite = new Palpite(golsCasa, golsVis);
+                    partida.setPalpite(palpite);
+                    palpitesRegistrados++;
                 }
             }
         } catch (IOException | NumberFormatException e) {
@@ -177,27 +216,14 @@ public class CarregadorDeDados {
         }
     }
 
-    public List<Grupo> getGrupos() {
-        return Collections.unmodifiableList(grupos);
-    }
-
-    public List<Estadio> getEstadios() {
-        return Collections.unmodifiableList(estadios);
-    }
-
-    public List<Selecao> getSelecoes() {
-        return Collections.unmodifiableList(selecoes);
-    }
-
-    public List<Partida> getPartidas() {
-        return Collections.unmodifiableList(partidas);
-    }
+    public List<Grupo> getGrupos() { return Collections.unmodifiableList(grupos); }
+    public List<Estadio> getEstadios() { return Collections.unmodifiableList(estadios); }
+    public List<Selecao> getSelecoes() { return Collections.unmodifiableList(selecoes); }
+    public List<Partida> getPartidas() { return Collections.unmodifiableList(partidas); }
 
     private Selecao buscarOuCriarSelecao(String nome) {
         for (Selecao s : selecoes) {
-            if (s.getNome().equals(nome)) {
-                return s;
-            }
+            if (s.getNome().equals(nome)) return s;
         }
         Selecao nova = new Selecao(nome);
         selecoes.add(nova);
@@ -206,9 +232,7 @@ public class CarregadorDeDados {
 
     private Estadio buscarOuCriarEstadio(String nome, String pais) {
         for (Estadio e : estadios) {
-            if (e.getNome().equals(nome)) {
-                return e;
-            }
+            if (e.getNome().equals(nome)) return e;
         }
         Estadio novo = new Estadio(nome, pais);
         estadios.add(novo);
@@ -217,9 +241,7 @@ public class CarregadorDeDados {
 
     private Grupo buscarOuCriarGrupo(char id) {
         for (Grupo g : grupos) {
-            if (g.getNome() == id) {
-                return g;
-            }
+            if (g.getNome() == id) return g;
         }
         Grupo novo = new Grupo(id);
         grupos.add(novo);
@@ -228,9 +250,7 @@ public class CarregadorDeDados {
 
     private Partida buscarPartidaPorId(int id) {
         for (Partida p : partidas) {
-            if (p.getId() == id) {
-                return p;
-            }
+            if (p.getId() == id) return p;
         }
         return null;
     }

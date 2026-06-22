@@ -31,3 +31,6 @@ bin/
 
 # Ignora o Memory Card local gerado em tempo de execucao (H08)
 src/resources/analistas.dat
+
+# Ignora o cache local de placares baixados via HTTP (H10)
+src/resources/resultados_web_cache.csv
