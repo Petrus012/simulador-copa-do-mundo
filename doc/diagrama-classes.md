@@ -49,7 +49,10 @@ classDiagram
     class LeitorConsole
 
     %% ── UI WEB ───────────────────────────────────────────────────────────────
+    class MainLayout
     class MainView
+    class PalpitesView
+    class RankingView
 
     %% ── REALIZAÇÕES (implementação de interfaces) ────────────────────────────
     RegraVencedorOuEmpate    ..|> RegraDePontuacaoDePalpite
@@ -86,7 +89,12 @@ classDiagram
     CarregadorDeDados --> Analista
 
     %% ── UI ───────────────────────────────────────────────────────────────────
-    MenuTerminal --> SimuladorAnalistasCopaDoMundo
-    MenuTerminal --> LeitorConsole
-    MainView     --> SimuladorAnalistasCopaDoMundo
+    MenuTerminal  --> SimuladorAnalistasCopaDoMundo
+    MenuTerminal  --> LeitorConsole
+    MainView      --> SimuladorAnalistasCopaDoMundo
+    PalpitesView  --> SimuladorAnalistasCopaDoMundo
+    RankingView   --> SimuladorAnalistasCopaDoMundo
+    MainLayout    --> MainView
+    MainLayout    --> PalpitesView
+    MainLayout    --> RankingView
 ```

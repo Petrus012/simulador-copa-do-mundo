@@ -163,10 +163,10 @@ Neste projeto inicial:
 | H09 | Ranking Geral de Prestígio                                  | sim               |
 | H10 | Sincronização Online de Resultados Oficiais                 | sim               |
 | H11 | Diagrama de Classes Simplificado e Checklist                | sim               |
-| H12 | Dashboard de Jogos e Resultados Oficiais                    | não               |
-| H13 | Registro de Palpites via Web                                | não               |
-| H14 | Ranking Comparativo de Analistas                            | não               |
-| H15 | Atualização do Diagrama de Classes Simplificado e Checklist | não               |
+| H12 | Dashboard de Jogos e Resultados Oficiais                    | sim               |
+| H13 | Registro de Palpites via Web                                | sim               |
+| H14 | Ranking Comparativo de Analistas                            | sim               |
+| H15 | Atualização do Diagrama de Classes Simplificado e Checklist | sim               |
 
 **Requisitos de OO**
 
