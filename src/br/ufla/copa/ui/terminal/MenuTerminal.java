@@ -256,27 +256,50 @@ public class MenuTerminal {
             return;
         }
 
-        try {
-            List<EstatisticasSelecao> classificacao =
-                    simulador.obterClassificacaoGrupo(entrada_str.charAt(0));
+        Grupo grupoEscolhido = simulador.buscarGrupo(entrada_str.charAt(0));
+        if (grupoEscolhido == null) {
+            System.out.println("Grupo '" + entrada_str + "' não encontrado.");
+            return;
+        }
 
-            System.out.println("\n--- Tabela de Classificação do Grupo " + entrada_str + " ---");
-            System.out.printf("%-4s | %-22s | %-3s | %-3s | %-5s | %-5s%n",
-                    "Pos", "Seleção", "Pts", "V", "SG", "GP");
-            System.out.println("------------------------------------------------------");
+        System.out.println("\nQual visão da tabela deseja exibir?");
+        System.out.println("  1 - Oficial (baseada nos resultados oficiais dos jogos)");
+        System.out.println("  2 - Palpites (baseada nos palpites do analista ativo)");
+        System.out.print("Opção: ");
+        String opcaoVisao = LeitorConsole.lerLinha().trim();
 
-            for (int i = 0; i < classificacao.size(); i++) {
-                EstatisticasSelecao est = classificacao.get(i);
-                System.out.printf("%2dº  | %-22s | %3d | %3d | %5d | %5d%n",
-                        (i + 1),
-                        est.getSelecao().getNome(),
-                        est.getPontos(),
-                        est.getVitorias(),
-                        est.getSaldoGols(),
-                        est.getGolsPro());
-            }
-        } catch (IllegalArgumentException e) {
-            System.out.println("\nErro: " + e.getMessage());
+        List<EstatisticasSelecao> classificacao;
+        String tituloVisao;
+
+        if ("1".equals(opcaoVisao)) {
+            classificacao = grupoEscolhido.getClassificacao();
+            tituloVisao = "Oficial";
+        } else if ("2".equals(opcaoVisao)) {
+            classificacao = grupoEscolhido.getClassificacaoPelosPalpites();
+            String nomeAnalista = simulador.getAnalistaAtivo() != null
+                    ? simulador.getAnalistaAtivo().getNome()
+                    : "Nenhum";
+            tituloVisao = "Palpites de [" + nomeAnalista + "]";
+        } else {
+            System.out.println("Opção inválida. Operação cancelada.");
+            return;
+        }
+
+        System.out.println("\n--- Tabela de Classificação do Grupo " + entrada_str
+                + " (" + tituloVisao + ") ---");
+        System.out.printf("%-4s | %-22s | %-3s | %-3s | %-5s | %-5s%n",
+                "Pos", "Seleção", "Pts", "V", "SG", "GP");
+        System.out.println("------------------------------------------------------");
+
+        for (int i = 0; i < classificacao.size(); i++) {
+            EstatisticasSelecao est = classificacao.get(i);
+            System.out.printf("%2dº  | %-22s | %3d | %3d | %5d | %5d%n",
+                    (i + 1),
+                    est.getSelecao().getNome(),
+                    est.getPontos(),
+                    est.getVitorias(),
+                    est.getSaldoGols(),
+                    est.getGolsPro());
         }
     }
 
