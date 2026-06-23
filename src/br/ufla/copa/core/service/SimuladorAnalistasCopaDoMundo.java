@@ -1,5 +1,10 @@
 package br.ufla.copa.core.service;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -224,20 +229,45 @@ public class SimuladorAnalistasCopaDoMundo {
 
     /**
      * Importa palpites do CSV (H2) e SALVA uma cópia no cofre do Analista Ativo (H8).
+     * O cofre recebe TODOS os palpites do arquivo, incluindo partidas já finalizadas,
+     * para que o histórico de palpites submetidos antes da Copa seja preservado.
+     * O bloqueio de H2 (não registrar na Partida se FINALIZADA) continua valendo.
      */
     public int importarPalpites(String caminhoArquivo) {
         int qtdImportada = carregador.importarPalpites(caminhoArquivo);
-        
-        // Interceptador H08: O que entrou na partida global, vai pro cofre do cara
+
         if (analistaAtivo != null) {
-            for (Partida p : carregador.getPartidas()) {
-                if (p.temPalpite()) {
-                    analistaAtivo.registrarPalpite(p.getId(), p.getPalpite());
-                }
-            }
+            salvarTodosPalpitesDoCsvNoCofre(caminhoArquivo);
         }
+        hidratarPalpitesDoAnalistaAtivo();
         salvarEstadoDoSistema();
         return qtdImportada;
+    }
+
+    private void salvarTodosPalpitesDoCsvNoCofre(String caminhoArquivo) {
+        try (BufferedReader leitor = Files.newBufferedReader(Path.of(caminhoArquivo), StandardCharsets.UTF_8)) {
+            String linha = leitor.readLine();
+            while ((linha = leitor.readLine()) != null) {
+                if (linha.isBlank()) continue;
+
+                String[] campos = linha.split(",", -1);
+                if (campos.length < 5) continue;
+
+                String golsCasaStr = campos[2].trim();
+                String golsVisStr  = campos[4].trim();
+                if (golsCasaStr.isEmpty() || golsVisStr.isEmpty()) continue;
+
+                int idPartida = Integer.parseInt(campos[0].trim());
+                int golsCasa  = Integer.parseInt(golsCasaStr);
+                int golsVis   = Integer.parseInt(golsVisStr);
+
+                if (golsCasa < 0 || golsVis < 0) continue;
+
+                analistaAtivo.registrarPalpite(idPartida, new Palpite(golsCasa, golsVis));
+            }
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Aviso: erro ao salvar palpites no cofre — " + e.getMessage());
+        }
     }
 
     public void importarResultadosOficiais(String caminhoArquivo) {

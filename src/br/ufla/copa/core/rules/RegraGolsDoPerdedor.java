@@ -34,11 +34,13 @@ public class RegraGolsDoPerdedor implements RegraDePontuacaoDePalpite {
         int golsPerdedorPalpite;
 
         if (oficialGolsTimeA > oficialGolsTimeB) {
-            // Time B perdeu
+            // Time A venceu, Time B perdeu — palpite também deve ter previsto vitória de A
+            if (palpiteGolsTimeA <= palpiteGolsTimeB) return 0;
             golsPerdedorOficial = oficialGolsTimeB;
             golsPerdedorPalpite = palpiteGolsTimeB;
         } else {
-            // Time A perdeu
+            // Time B venceu, Time A perdeu — palpite também deve ter previsto vitória de B
+            if (palpiteGolsTimeB <= palpiteGolsTimeA) return 0;
             golsPerdedorOficial = oficialGolsTimeA;
             golsPerdedorPalpite = palpiteGolsTimeA;
         }

@@ -158,11 +158,11 @@ Neste projeto inicial:
 | H04 | Carregamento dos Resultados Oficiais                        | sim               |
 | H05 | Pontuação do Palpite de Uma Partida                         | sim               |
 | H06 | Pontuação de Todos os Palpites                              | sim               |
-| H07 | Pontuação pela Classificação na primeira fase               | não               |
-| H08 | Criação de Perfil de Analista e Persistência dos Palpites   | não               |
-| H09 | Ranking Geral de Prestígio                                  | não               |
-| H10 | Sincronização Online de Resultados Oficiais                 | não               |
-| H11 | Diagrama de Classes Simplificado e Checklist                | não               |
+| H07 | Pontuação pela Classificação na primeira fase               | sim               |
+| H08 | Criação de Perfil de Analista e Persistência dos Palpites   | sim               |
+| H09 | Ranking Geral de Prestígio                                  | sim               |
+| H10 | Sincronização Online de Resultados Oficiais                 | sim               |
+| H11 | Diagrama de Classes Simplificado e Checklist                | sim               |
 | H12 | Dashboard de Jogos e Resultados Oficiais                    | não               |
 | H13 | Registro de Palpites via Web                                | não               |
 | H14 | Ranking Comparativo de Analistas                            | não               |
