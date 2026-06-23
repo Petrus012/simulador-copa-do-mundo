@@ -6,6 +6,7 @@ import br.ufla.copa.core.model.StatusPartida;
 import br.ufla.copa.core.contracts.RegraApostouEmpateNaoFoi;
 import br.ufla.copa.core.contracts.RegraGolsDoPerdedor;
 import br.ufla.copa.core.contracts.RegraGolsDoVencedor;
+import br.ufla.copa.core.contracts.RegraPlacarExatoDeEmpate;
 import br.ufla.copa.core.contracts.RegraSaldoDeGols;
 import br.ufla.copa.core.contracts.RegraVencedorOuEmpate;
 
@@ -24,7 +25,7 @@ public class MotorDePontuacao {
     private List<RegraDePontuacaoDePalpite> regras;
 
     /**
-     * Constrói o motor com o conjunto padrão de regras (R1 a R5).
+     * Constrói o motor com o conjunto padrão de regras (R1 a R6).
      */
     public MotorDePontuacao() {
         this.regras = new ArrayList<>();
@@ -33,6 +34,7 @@ public class MotorDePontuacao {
         this.regras.add(new RegraGolsDoVencedor());
         this.regras.add(new RegraGolsDoPerdedor());
         this.regras.add(new RegraApostouEmpateNaoFoi());
+        this.regras.add(new RegraPlacarExatoDeEmpate());
     }
 
     /**

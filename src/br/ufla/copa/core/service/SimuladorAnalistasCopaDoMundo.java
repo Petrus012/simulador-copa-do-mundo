@@ -1,7 +1,9 @@
 package br.ufla.copa.core.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import br.ufla.copa.core.contracts.RegraPosicaoFinalNoGrupo;
 import br.ufla.copa.core.data.CarregadorDeDados;
 import br.ufla.copa.core.model.EstatisticasSelecao;
 import br.ufla.copa.core.model.Grupo;
@@ -133,5 +135,70 @@ public class SimuladorAnalistasCopaDoMundo {
      */
     public int somarPontuacao(List<ResultadoPontuacao> resultados) {
         return motorDePontuacao.somarPontuacao(resultados);
+    }
+
+    // -----------------------------------------------------------------------
+    // Bônus de posição final no grupo (H7)
+    // -----------------------------------------------------------------------
+
+    /**
+     * Calcula o bônus de posição final para todos os grupos finalizados (H7).
+     * Para cada grupo em que todas as partidas estão com status FINALIZADA,
+     * compara a classificação oficial com a prevista pelos palpites e pontua
+     * usando RegraPosicaoFinalNoGrupo (1º=15pts, 2º=10pts, 3º=5pts).
+     *
+     * @return lista com um ResultadoBonusPosicao por grupo finalizado
+     */
+    public List<ResultadoBonusPosicao> calcularBonusPosicao() {
+        List<ResultadoBonusPosicao> resultados = new ArrayList<>();
+        RegraPosicaoFinalNoGrupo regra = new RegraPosicaoFinalNoGrupo();
+
+        for (Grupo grupo : carregador.getGrupos()) {
+            if (!grupo.isGrupoFinalizado()) {
+                continue;
+            }
+
+            List<EstatisticasSelecao> classificacaoOficial  = grupo.getClassificacao();
+            List<EstatisticasSelecao> classificacaoPalpites = grupo.getClassificacaoPorPalpites();
+
+            ResultadoBonusPosicao resultado = new ResultadoBonusPosicao(grupo.getNome());
+
+            // Pontua apenas as 3 primeiras posições oficiais
+            for (int posOficial = 1; posOficial <= 3 && posOficial <= classificacaoOficial.size(); posOficial++) {
+                EstatisticasSelecao selecaoOficial = classificacaoOficial.get(posOficial - 1);
+                String nomeSelecao = selecaoOficial.getSelecao().getNome();
+
+                // Descobre em qual posição o analista colocou essa seleção
+                int posPalpite = buscarPosicaoNaLista(classificacaoPalpites, nomeSelecao);
+
+                int pontos = regra.calcularPontosPorPosicao(posPalpite, posOficial);
+                resultado.adicionarPosicao(posOficial, nomeSelecao, posPalpite, pontos);
+            }
+
+            resultados.add(resultado);
+        }
+
+        return resultados;
+    }
+
+    /**
+     * Soma os pontos de bônus de posição de todos os grupos (H7).
+     */
+    public int somarBonusPosicao(List<ResultadoBonusPosicao> resultados) {
+        int total = 0;
+        for (ResultadoBonusPosicao r : resultados) {
+            total += r.getTotalPontos();
+        }
+        return total;
+    }
+
+    /** Retorna a posição (1-based) de uma seleção pelo nome numa lista ordenada. */
+    private int buscarPosicaoNaLista(List<EstatisticasSelecao> lista, String nomeSelecao) {
+        for (int i = 0; i < lista.size(); i++) {
+            if (lista.get(i).getSelecao().getNome().equals(nomeSelecao)) {
+                return i + 1;
+            }
+        }
+        return -1; // seleção sem palpite — sem bônus
     }
 }

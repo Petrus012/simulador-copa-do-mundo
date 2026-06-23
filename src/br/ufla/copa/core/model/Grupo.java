@@ -37,9 +37,31 @@ public class Grupo {
      * Usa resultados oficiais quando disponíveis; palpites caso contrário (H3/H4).
      */
     public List<EstatisticasSelecao> getClassificacao() {
-        computarClassificacao();
+        computarClassificacao(false);
         classificacao.sort(new ClassificacaoComparator());
         return classificacao;
+    }
+
+    /**
+     * Retorna a tabela de classificação baseada exclusivamente nos palpites (H7).
+     * Partidas sem palpite não são contabilizadas.
+     */
+    public List<EstatisticasSelecao> getClassificacaoPorPalpites() {
+        computarClassificacao(true);
+        classificacao.sort(new ClassificacaoComparator());
+        return classificacao;
+    }
+
+    /**
+     * Verifica se todas as partidas do grupo têm status FINALIZADA (H7).
+     */
+    public boolean isGrupoFinalizado() {
+        for (Partida p : partidas) {
+            if (p.getStatus() != StatusPartida.FINALIZADA) {
+                return false;
+            }
+        }
+        return !partidas.isEmpty();
     }
 
     public void adicionarSelecao(Selecao selecao) {
@@ -55,12 +77,11 @@ public class Grupo {
     }
 
     /**
-     * Reconstrói a lista de estatísticas do zero a cada chamada,
-     * garantindo que mudanças nos palpites ou resultados sejam refletidas.
-     * Registra tanto as estatísticas gerais quanto as de confronto direto,
-     * necessárias para o desempate correto (critérios a, b, c do enunciado H3).
+     * Reconstrói a lista de estatísticas do zero a cada chamada.
+     * @param apenasPalpites se true, usa somente palpites (H7); se false,
+     *                       prefere resultados oficiais e cai em palpite (H3/H4).
      */
-    private void computarClassificacao() {
+    private void computarClassificacao(boolean apenasPalpites) {
         classificacao.clear();
         for (Selecao s : selecoes) {
             classificacao.add(new EstatisticasSelecao(s));
@@ -76,26 +97,35 @@ public class Grupo {
             int golsVisitante;
             boolean temDados;
 
-            if (p.getStatus() == StatusPartida.FINALIZADA) {
-                golsCasa = p.getGolsTimeCasaOficial();
-                golsVisitante = p.getGolsTimeVisitanteOficial();
-                temDados = true;
-            } else if (p.temPalpite()) {
-                golsCasa = p.getPalpite().getGolsTimeCasa();
-                golsVisitante = p.getPalpite().getGolsTimeVisitante();
-                temDados = true;
+            if (apenasPalpites) {
+                if (p.temPalpite()) {
+                    golsCasa = p.getPalpite().getGolsTimeCasa();
+                    golsVisitante = p.getPalpite().getGolsTimeVisitante();
+                    temDados = true;
+                } else {
+                    temDados = false;
+                    golsCasa = 0;
+                    golsVisitante = 0;
+                }
             } else {
-                temDados = false;
-                golsCasa = 0;
-                golsVisitante = 0;
+                if (p.getStatus() == StatusPartida.FINALIZADA) {
+                    golsCasa = p.getGolsTimeCasaOficial();
+                    golsVisitante = p.getGolsTimeVisitanteOficial();
+                    temDados = true;
+                } else if (p.temPalpite()) {
+                    golsCasa = p.getPalpite().getGolsTimeCasa();
+                    golsVisitante = p.getPalpite().getGolsTimeVisitante();
+                    temDados = true;
+                } else {
+                    temDados = false;
+                    golsCasa = 0;
+                    golsVisitante = 0;
+                }
             }
 
             if (temDados) {
-                // Estatísticas gerais do grupo
                 casa.registrarResultado(golsCasa, golsVisitante);
                 visitante.registrarResultado(golsVisitante, golsCasa);
-
-                // Confronto direto — necessário para o desempate correto (H3)
                 casa.registrarConfrontoDirecto(p.getTimeVisitante(), golsCasa, golsVisitante);
                 visitante.registrarConfrontoDirecto(p.getTimeDaCasa(), golsVisitante, golsCasa);
             }
