@@ -4,10 +4,9 @@ import java.util.List;
 import java.util.Scanner;
 
 import br.ufla.copa.core.model.Estadio;
+import br.ufla.copa.core.model.EstatisticasSelecao;
 import br.ufla.copa.core.model.Grupo;
 import br.ufla.copa.core.model.Partida;
-import br.ufla.copa.core.model.EstatisticasSelecao;
-import br.ufla.copa.core.service.ResultadoBonusPosicao;
 import br.ufla.copa.core.service.ResultadoPontuacao;
 import br.ufla.copa.core.service.SimuladorAnalistasCopaDoMundo;
 
@@ -260,7 +259,7 @@ public class MenuTerminal {
     }
 
     // -----------------------------------------------------------------------
-    // H6 + H7 — Pontuação total de todos os palpites e bônus de posição
+    // H6 — Pontuação total de todos os palpites
     // -----------------------------------------------------------------------
 
     private void exibirPontuacaoTotal() {
@@ -289,39 +288,7 @@ public class MenuTerminal {
                     resultado.getTotalPontos());
         }
 
-        int totalPalpites = simulador.somarPontuacao(resultados);
         System.out.println("-----------------------------------------------------------");
-        System.out.printf("%-55s %6d pts%n", "Subtotal palpites:", totalPalpites);
-
-        // H7 — Bônus de posição final (apenas grupos com todas as partidas finalizadas)
-        List<ResultadoBonusPosicao> bonus = simulador.calcularBonusPosicao();
-        int totalBonus = simulador.somarBonusPosicao(bonus);
-
-        if (!bonus.isEmpty()) {
-            System.out.println("\n--- Bônus de Posição Final no Grupo (H7) ---");
-            System.out.printf("%-8s | %-22s | %-12s | %-12s | %-6s%n",
-                    "Grupo", "Seleção", "Pos. Palpite", "Pos. Oficial", "Pontos");
-            System.out.println("----------------------------------------------------------------------");
-
-            for (ResultadoBonusPosicao r : bonus) {
-                for (int i = 0; i < r.getQuantidadePosicoes(); i++) {
-                    String posPalpite = r.getPosicaoNoPalpite(i) == -1
-                            ? "sem palpite"
-                            : r.getPosicaoNoPalpite(i) + "º";
-                    System.out.printf("%-8s | %-22s | %-12s | %-12s | %6d%n",
-                            "Grupo " + r.getNomeGrupo(),
-                            r.getNomeSelecao(i),
-                            posPalpite,
-                            r.getPosicaoOficial(i) + "º",
-                            r.getPontos(i));
-                }
-            }
-
-            System.out.println("----------------------------------------------------------------------");
-            System.out.printf("%-62s %6d pts%n", "Subtotal bônus posição:", totalBonus);
-        }
-
-        System.out.println("===================================================================");
-        System.out.printf("%-55s %6d pts%n", "PONTUAÇÃO TOTAL:", totalPalpites + totalBonus);
+        System.out.printf("%-55s %6d pts%n", "PONTUAÇÃO TOTAL:", simulador.somarPontuacao(resultados));
     }
 }
