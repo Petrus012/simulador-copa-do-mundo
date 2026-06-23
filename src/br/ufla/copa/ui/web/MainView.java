@@ -1,129 +1,197 @@
 package br.ufla.copa.ui.web;
 
-import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+
+import java.util.ArrayList;
 import java.util.List;
 
-import br.ufla.copa.core.model.Estadio;
+import br.ufla.copa.core.model.EstatisticasSelecao;
+import br.ufla.copa.core.model.Grupo;
+import br.ufla.copa.core.model.Partida;
+import br.ufla.copa.core.model.StatusPartida;
 import br.ufla.copa.core.service.SimuladorAnalistasCopaDoMundo;
 
-
 /**
- * Classe que implementa a página inicial da interface web
+ * Dashboard principal da interface web (H12).
+ * Exibe abas por grupo com as partidas e a classificação oficial de cada grupo.
+ * Toda a lógica de negócio reside na camada core; aqui apenas chamamos o Simulador.
  */
-@Route("") 
+@Route(value = "", layout = MainLayout.class)
+@PageTitle("Jogos e Resultados | Copa 2026")
 public class MainView extends VerticalLayout {
 
-    // Simulador, objeto principal da regra de negócio
-    private SimuladorAnalistasCopaDoMundo simulador;
+    private final SimuladorAnalistasCopaDoMundo simulador;
+    private final List<Grupo> grupos;
+    // Lista paralela às abas para localizar o grupo pelo índice da tab selecionada
+    private final List<Tab> listaAbas;
 
-    // Caixa de texto para inserção do nome
-    private TextField campoNome;
-    // Botão que envia notificação de saudação
-    private Button botaoSaudacao;
-    // Botão que carrega os dados dos estadios
-    private Button botaoCarregarEstadios;
-    // Grid para exibição dos dados dos estádios
-    private Grid<Estadio> gridEstadios;
+    private final Grid<Partida> gridPartidas;
+    private final Grid<EstatisticasSelecao> gridClassificacao;
 
-    /**
-     * Construtor da classe
-     */
     public MainView() {
-        // obtém a única instância do simulador (Padrão de Projeto Singleton)
         simulador = SimuladorAnalistasCopaDoMundo.getInstance();
+        grupos    = simulador.buscarGrupos();
+        listaAbas = new ArrayList<>();
 
-        // Cabeçalho
-        H1 cabecalho = new H1("Simulador de Analistas Esportivos - Copa 2026");
-        
-        // Caixa de texto para inserção do nome
-        campoNome = new TextField("Digite seu nome:");
-        campoNome.setPlaceholder("Ex: João Silva"); // dica que aparece na caixa de texto
+        add(new H2("Jogos e Resultados Oficiais"));
 
-        // Botão com Notificação
-        botaoSaudacao = new Button("Enviar");
+        Tabs abaGrupos = criarAbas();
+        add(abaGrupos);
 
-        // Botão para carregar os dados dos estadios
-        botaoCarregarEstadios = new Button("Carregar Estadios");
+        add(new H3("Partidas"));
+        gridPartidas = criarGridPartidas();
+        add(gridPartidas);
 
-        // Titulo para o Grid
-        H2 tituloGrid = new H2("Estádios");
-        
-        // Grid para exibir dados da classe Estadio
-        gridEstadios = new Grid<>(Estadio.class);
+        add(new H3("Classificação Oficial do Grupo"));
+        gridClassificacao = criarGridClassificacao();
+        add(gridClassificacao);
 
-        // Configura os eventos dos componentes
-        configuraEventos();
-        
-        // Adiciona todos os componentes ao layout da página
-        add(cabecalho, campoNome, botaoSaudacao, botaoCarregarEstadios, tituloGrid, gridEstadios);
-        
-        // Ajustes de layout (centraliza os componentes)
-        setAlignItems(Alignment.CENTER);
-    }
-
-    private void configuraEventos() {
-        // Tratamento do evento de clique do botão de Saudação usando Classe Anônima
-        botaoSaudacao.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+        // Evento de troca de aba — usa Classe Anônima conforme requisito do trabalho
+        abaGrupos.addSelectedChangeListener(new ComponentEventListener<Tabs.SelectedChangeEvent>() {
             @Override
-            public void onComponentEvent(ClickEvent<Button> event) {
-                // obtém o texto do campo de nome
-                String nome = campoNome.getValue();
-                // Exibe uma notificação de acordo com o valor do campo de nome
-                if (nome.isEmpty()) {
-                    Notification.show("Por favor, digite um nome!");
-                } else {
-                    Notification.show("Olá, " + nome + "! Bem-vindo ao simulador.");
+            public void onComponentEvent(Tabs.SelectedChangeEvent event) {
+                int index = listaAbas.indexOf(event.getSelectedTab());
+                if (index >= 0 && index < grupos.size()) {
+                    carregarDadosDoGrupo(grupos.get(index));
                 }
             }
         });
 
-        // Tratamento do evento de clique do botão de Carregar Estadios usando Classe Anônima
-        botaoCarregarEstadios.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+        // Carrega o primeiro grupo ao abrir a página
+        if (!grupos.isEmpty()) {
+            carregarDadosDoGrupo(grupos.get(0));
+        }
+
+        setWidthFull();
+        setPadding(true);
+        setSpacing(true);
+    }
+
+    // -----------------------------------------------------------------------
+    // Criação dos componentes
+    // -----------------------------------------------------------------------
+
+    private Tabs criarAbas() {
+        Tabs tabs = new Tabs();
+        for (Grupo g : grupos) {
+            Tab aba = new Tab("Grupo " + g.getNome());
+            listaAbas.add(aba);
+            tabs.add(aba);
+        }
+        return tabs;
+    }
+
+    private Grid<Partida> criarGridPartidas() {
+        Grid<Partida> grid = new Grid<>();
+        grid.removeAllColumns();
+
+        grid.addColumn(new ValueProvider<Partida, Integer>() {
             @Override
-            public void onComponentEvent(ClickEvent<Button> event) {
-                carregarGridEstadios();
+            public Integer apply(Partida p) {
+                return p.getId();
             }
-        });
+        }).setHeader("ID").setAutoWidth(true);
+
+        grid.addColumn(new ValueProvider<Partida, String>() {
+            @Override
+            public String apply(Partida p) {
+                return p.getTimeDaCasa().getNome();
+            }
+        }).setHeader("Mandante").setAutoWidth(true).setFlexGrow(1);
+
+        grid.addColumn(new ValueProvider<Partida, String>() {
+            @Override
+            public String apply(Partida p) {
+                if (p.getStatus() == StatusPartida.FINALIZADA) {
+                    return p.getGolsTimeCasaOficial() + " x " + p.getGolsTimeVisitanteOficial();
+                }
+                return "— x —";
+            }
+        }).setHeader("Placar Oficial").setAutoWidth(true);
+
+        grid.addColumn(new ValueProvider<Partida, String>() {
+            @Override
+            public String apply(Partida p) {
+                return p.getTimeVisitante().getNome();
+            }
+        }).setHeader("Visitante").setAutoWidth(true).setFlexGrow(1);
+
+        grid.addColumn(new ValueProvider<Partida, String>() {
+            @Override
+            public String apply(Partida p) {
+                switch (p.getStatus()) {
+                    case FINALIZADA:   return "Finalizada";
+                    case EM_ANDAMENTO: return "Em andamento";
+                    default:           return "Agendada";
+                }
+            }
+        }).setHeader("Status").setAutoWidth(true);
+
+        grid.setAllRowsVisible(true);
+        grid.setWidthFull();
+        return grid;
     }
 
-    private void carregarGridEstadios() {
-        // Configura os dados (Simulando o que viria do repositório/core)
-        List<Estadio> listaEstadios = simulador.buscarEstadios();
-        
-        // Passa a lista de dados para o grid
-        gridEstadios.setItems(listaEstadios);
-        // Remove as colunas adicionadas anteriormente
-        gridEstadios.removeAllColumns();
+    private Grid<EstatisticasSelecao> criarGridClassificacao() {
+        Grid<EstatisticasSelecao> grid = new Grid<>();
+        grid.removeAllColumns();
 
-        // Adiciona a primeira coluna ao grid, indicado que ela deve usar o
-        // método getNome da classe Estadio para obter a informação        
-        gridEstadios.addColumn(Estadio::getNome)
-            .setHeader("Nome do Estádio") // título da coluna no grid
-            .setSortable(true)    // permite ordenar pela coluna
-            .setAutoWidth(true); // define largura automática
+        grid.addColumn(new ValueProvider<EstatisticasSelecao, String>() {
+            @Override
+            public String apply(EstatisticasSelecao es) {
+                return es.getSelecao().getNome();
+            }
+        }).setHeader("País").setAutoWidth(true).setFlexGrow(1);
 
-        // Adiciona a segunda coluna ao grid, indicado que ela deve usar o
-        // método getCapacidade da classe Estadio para obter a informação
-        gridEstadios.addColumn(Estadio::getCapacidade)
-            .setHeader("Capacidade") // título da coluna no grid
-            .setSortable(true)    // permite ordenar pela coluna
-            .setAutoWidth(true); // define largura automática
-        
-        // Obs. 1: o encadeamento de chamadas dos comandos acima usa o 
-        //         padrão de projeto Fluent Interface
-        // Obs. 2: a passagem de referência de método com o operador :: como
-        //         em Estadio::getNome é uma forma concisa de escrever uma 
-        //         função lambda (algo que não é permitido no trabalho, mas 
-        //         será aceito nesse caso para simplificar a implementação)
+        grid.addColumn(new ValueProvider<EstatisticasSelecao, Integer>() {
+            @Override
+            public Integer apply(EstatisticasSelecao es) {
+                return es.getPontos();
+            }
+        }).setHeader("Pts").setAutoWidth(true);
+
+        grid.addColumn(new ValueProvider<EstatisticasSelecao, Integer>() {
+            @Override
+            public Integer apply(EstatisticasSelecao es) {
+                return es.getVitorias();
+            }
+        }).setHeader("V").setAutoWidth(true);
+
+        grid.addColumn(new ValueProvider<EstatisticasSelecao, Integer>() {
+            @Override
+            public Integer apply(EstatisticasSelecao es) {
+                return es.getSaldoGols();
+            }
+        }).setHeader("SG").setAutoWidth(true);
+
+        grid.addColumn(new ValueProvider<EstatisticasSelecao, Integer>() {
+            @Override
+            public Integer apply(EstatisticasSelecao es) {
+                return es.getGolsPro();
+            }
+        }).setHeader("GP").setAutoWidth(true);
+
+        grid.setAllRowsVisible(true);
+        grid.setWidthFull();
+        return grid;
     }
 
+    // -----------------------------------------------------------------------
+    // Atualização dos dados exibidos
+    // -----------------------------------------------------------------------
+
+    private void carregarDadosDoGrupo(Grupo grupo) {
+        gridPartidas.setItems(grupo.getPartidas());
+        // getClassificacao() prioriza resultados oficiais (H4) sobre palpites
+        gridClassificacao.setItems(grupo.getClassificacao());
+    }
 }
