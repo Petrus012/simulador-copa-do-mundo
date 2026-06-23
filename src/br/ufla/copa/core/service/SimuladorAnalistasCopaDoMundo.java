@@ -15,6 +15,7 @@ import br.ufla.copa.core.model.Grupo;
 import br.ufla.copa.core.model.Palpite;
 import br.ufla.copa.core.model.Partida;
 import br.ufla.copa.core.model.Estadio;
+import br.ufla.copa.core.model.StatusPartida;
 
 /**
  * Fachada principal do sistema (Padrão Singleton + Facade).
@@ -272,6 +273,21 @@ public class SimuladorAnalistasCopaDoMundo {
 
     public void importarResultadosOficiais(String caminhoArquivo) {
         carregador.importarResultadosOficiais(caminhoArquivo);
+    }
+
+    /**
+     * Atualiza o palpite do analista ativo para uma partida específica (H13 — web).
+     * Não persiste no HD imediatamente; chame salvarEstadoDoSistema() ao final do lote.
+     * Retorna false se a partida não existir, já estiver finalizada ou os gols forem negativos.
+     */
+    public boolean atualizarPalpite(int idPartida, int golsCasa, int golsVisitante) {
+        if (golsCasa < 0 || golsVisitante < 0) return false;
+        Partida partida = buscarPartidaPorId(idPartida);
+        if (partida == null || partida.getStatus() == StatusPartida.FINALIZADA) return false;
+        Palpite novoPalpite = new Palpite(golsCasa, golsVisitante);
+        analistaAtivo.registrarPalpite(idPartida, novoPalpite);
+        partida.setPalpite(novoPalpite);
+        return true;
     }
 
     // -----------------------------------------------------------------------
