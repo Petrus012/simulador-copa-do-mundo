@@ -32,9 +32,9 @@ public class SimuladorAnalistasCopaDoMundo {
         this.motorDePontuacao = new MotorDePontuacao();
 
         // Sincroniza resultados online ao iniciar (H10)
-        System.out.println("[Rede] Sincronizando resultados online na inicialização...");
-        carregador.salvarSnapshotResultados();
-        carregador.sincronizarResultadosOnline();
+        //System.out.println("[Rede] Sincronizando resultados online na inicialização...");
+        //carregador.salvarSnapshotResultados();
+        //carregador.sincronizarResultadosOnline();
 
         List<Analista> salvos = carregador.carregarAnalistasDoHD();
         if (salvos != null && !salvos.isEmpty()) {
