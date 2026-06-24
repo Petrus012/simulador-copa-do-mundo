@@ -25,13 +25,8 @@ import br.ufla.copa.core.model.Partida;
 import br.ufla.copa.core.model.StatusPartida;
 import br.ufla.copa.core.service.SimuladorAnalistasCopaDoMundo;
 
-/**
- * Tela de registro de palpites via interface web (H13).
- * Permite selecionar ou criar um analista, escolher um grupo por aba
- * e digitar o palpite de cada partida. Ao salvar, exibe a classificação
- * do grupo calculada pelos palpites registrados.
- * Não há lógica de negócio aqui — tudo é delegado ao Simulador.
- */
+// Tela de registro de palpites via web: seleção/criação de analista, abas por grupo
+// e formulário de palpites por partida; lógica de negócio delegada ao Simulador (H13)
 @Route(value = "palpites", layout = MainLayout.class)
 @PageTitle("Registrar Palpites | Copa 2026")
 public class PalpitesView extends VerticalLayout {
@@ -40,20 +35,17 @@ public class PalpitesView extends VerticalLayout {
     private final List<Grupo> grupos;
     private final List<Tab> listaAbas;
 
-    // Componentes de seleção de analista
     private final Select<String> selectorAnalista;
     private final TextField campoNovoAnalista;
 
-    // Título dinâmico acima do formulário
     private final H3 tituloFormulario;
 
-    // Container do formulário — é reconstruído ao trocar de grupo ou analista
+    // Container do formulário — reconstruído ao trocar de grupo ou analista
     private final VerticalLayout areaFormulario;
 
-    // Grid de classificação pelos palpites
     private final GridClassificacao gridClassificacaoPalpites;
 
-    // Estado do grupo exibido e das linhas do formulário (listas paralelas)
+    // Estado do grupo atual e linhas do formulário (listas paralelas)
     private Grupo grupoAtual;
     private List<Partida> partidasDaLinha;
     private List<TextField> camposGolsCasa;
@@ -70,7 +62,7 @@ public class PalpitesView extends VerticalLayout {
 
         add(new H2("Registrar Palpites"));
 
-        // ---- Seção de seleção / criação de analista ----
+        // Barra de seleção e criação de analista
         selectorAnalista   = criarSelectorAnalista();
         campoNovoAnalista  = new TextField();
         campoNovoAnalista.setPlaceholder("Nome do novo analista");
@@ -89,11 +81,9 @@ public class PalpitesView extends VerticalLayout {
         barraAnalista.setAlignItems(Alignment.BASELINE);
         add(barraAnalista);
 
-        // ---- Abas de grupos ----
         Tabs abaGrupos = criarAbas();
         add(abaGrupos);
 
-        // ---- Formulário de palpites ----
         tituloFormulario = new H3();
         areaFormulario   = new VerticalLayout();
         areaFormulario.setPadding(false);
@@ -104,12 +94,11 @@ public class PalpitesView extends VerticalLayout {
         configurarBotaoSalvar(botaoSalvar);
         add(botaoSalvar);
 
-        // ---- Classificação pelos palpites ----
         add(new H3("Classificação pelo meus Palpites"));
         gridClassificacaoPalpites = new GridClassificacao();
         add(gridClassificacaoPalpites);
 
-        // ---- Evento de troca de aba ----
+        // Troca de aba via Classe Anônima — sem lambdas
         abaGrupos.addSelectedChangeListener(new ComponentEventListener<Tabs.SelectedChangeEvent>() {
             @Override
             public void onComponentEvent(Tabs.SelectedChangeEvent event) {
@@ -154,7 +143,7 @@ public class PalpitesView extends VerticalLayout {
     }
 
     // -----------------------------------------------------------------------
-    // Configuração de eventos dos botões (Classes Anônimas — sem lambdas)
+    // Eventos dos botões via Classe Anônima — sem lambdas
     // -----------------------------------------------------------------------
 
     private void configurarBotaoCriar(Button botao) {
@@ -212,11 +201,8 @@ public class PalpitesView extends VerticalLayout {
     // Formulário de palpites
     // -----------------------------------------------------------------------
 
-    /**
-     * Reconstrói o formulário para o grupo recebido.
-     * Pré-preenche os campos com os palpites já salvos pelo analista ativo.
-     * Partidas finalizadas ficam em modo leitura.
-     */
+    // Reconstrói o formulário para o grupo; pré-preenche com palpites já salvos
+    // e coloca partidas finalizadas em modo somente leitura
     private void reconstruirFormulario(Grupo grupo) {
         areaFormulario.removeAll();
         partidasDaLinha     = new ArrayList<>(grupo.getPartidas());
@@ -231,7 +217,6 @@ public class PalpitesView extends VerticalLayout {
         for (Partida p : partidasDaLinha) {
             boolean finalizada = p.getStatus() == StatusPartida.FINALIZADA;
 
-            // Campos de gols
             TextField tfCasa = new TextField();
             tfCasa.setWidth("55px");
             tfCasa.setPlaceholder("0");
@@ -240,19 +225,17 @@ public class PalpitesView extends VerticalLayout {
             tfVisitante.setWidth("55px");
             tfVisitante.setPlaceholder("0");
 
-            // Pré-preenche com palpite existente (carregado via hidratação do analista)
+            // Pré-preenche com palpite existente do analista ativo
             if (p.temPalpite()) {
                 tfCasa.setValue(String.valueOf(p.getPalpite().getGolsTimeCasa()));
                 tfVisitante.setValue(String.valueOf(p.getPalpite().getGolsTimeVisitante()));
             }
 
-            // Partidas finalizadas ficam somente leitura
             if (finalizada) {
                 tfCasa.setReadOnly(true);
                 tfVisitante.setReadOnly(true);
             }
 
-            // Status e resultado oficial (se finalizada)
             String labelStatus = finalizada
                 ? " (Finalizada — Oficial: "
                   + p.getGolsTimeCasaOficial() + "x" + p.getGolsTimeVisitanteOficial() + ")"
@@ -273,14 +256,10 @@ public class PalpitesView extends VerticalLayout {
             camposGolsVisitante.add(tfVisitante);
         }
 
-        // Atualiza classificação baseada nos palpites atuais do analista
         atualizarGridClassificacaoPalpites(grupo);
     }
 
-    /**
-     * Lê os campos do formulário, registra os palpites válidos no serviço
-     * e persiste no HD ao final do lote.
-     */
+    // Lê os campos, registra os palpites válidos no serviço e persiste no HD
     private void salvarPalpitesDoGrupo() {
         if (grupoAtual == null) return;
 
@@ -313,7 +292,6 @@ public class PalpitesView extends VerticalLayout {
         // Persiste todos os palpites do lote de uma vez
         simulador.salvarEstadoDoSistema();
 
-        // Atualiza a classificação pelos palpites após o salvamento
         atualizarGridClassificacaoPalpites(grupoAtual);
 
         String mensagem = salvos + " palpite(s) salvo(s)";
@@ -327,7 +305,6 @@ public class PalpitesView extends VerticalLayout {
     // Utilitários
     // -----------------------------------------------------------------------
 
-    /** Recarrega os itens do selector com a lista atualizada de analistas. */
     private void atualizarItensDoSelector(Select<String> sel) {
         List<String> nomes = new ArrayList<>();
         for (Analista a : simulador.getAnalistas()) {
@@ -339,7 +316,6 @@ public class PalpitesView extends VerticalLayout {
         }
     }
 
-    /** Atualiza o grid de classificação com os palpites do analista ativo para o grupo. */
     private void atualizarGridClassificacaoPalpites(Grupo grupo) {
         gridClassificacaoPalpites.setItems(grupo.getClassificacaoPelosPalpites());
     }

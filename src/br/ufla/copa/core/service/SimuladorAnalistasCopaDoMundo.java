@@ -15,6 +15,7 @@ import br.ufla.copa.core.model.Partida;
 import br.ufla.copa.core.model.ResultadoImportacaoPalpites;
 import br.ufla.copa.core.model.StatusPartida;
 
+// Fachada singleton que coordena todas as operações do sistema (H1–H10)
 public class SimuladorAnalistasCopaDoMundo {
 
     private static SimuladorAnalistasCopaDoMundo instancia;
@@ -24,15 +25,16 @@ public class SimuladorAnalistasCopaDoMundo {
 
     private List<Analista> analistas;
     private Analista analistaAtivo;
-    private boolean sincronizacaoWebAtivada = false;
+    private boolean sincronizacaoWebAtivada = true;
 
     private SimuladorAnalistasCopaDoMundo() {
         this.carregador = new CarregadorDeDados();
         this.motorDePontuacao = new MotorDePontuacao();
 
-        if (this.sincronizacaoWebAtivada) {
-            this.carregador.sincronizarResultadosOnline();
-        }
+        // Sincroniza resultados online ao iniciar (H10)
+        System.out.println("[Rede] Sincronizando resultados online na inicialização...");
+        carregador.salvarSnapshotResultados();
+        carregador.sincronizarResultadosOnline();
 
         List<Analista> salvos = carregador.carregarAnalistasDoHD();
         if (salvos != null && !salvos.isEmpty()) {
@@ -62,6 +64,7 @@ public class SimuladorAnalistasCopaDoMundo {
         return analistas;
     }
 
+    // Carrega os palpites do cofre do analista ativo nas partidas correspondentes
     public void hidratarPalpitesDoAnalistaAtivo() {
         if (analistaAtivo == null) {
             return;
@@ -77,6 +80,7 @@ public class SimuladorAnalistasCopaDoMundo {
         }
     }
 
+    // Cadastra novo analista, torna-o ativo e persiste (H8)
     public boolean cadastrarAnalista(String nome) {
         if (nome == null || nome.trim().isEmpty()) {
             return false;
@@ -97,6 +101,7 @@ public class SimuladorAnalistasCopaDoMundo {
         return true;
     }
 
+    // Troca o analista ativo e hidrata seus palpites nas partidas (H8)
     public boolean selecionarAnalista(String nome) {
         if (nome == null || nome.trim().isEmpty()) {
             return false;
@@ -125,6 +130,7 @@ public class SimuladorAnalistasCopaDoMundo {
         }
     }
 
+    // Calcula o ranking de todos os analistas ordenado por prestígio decrescente (H9)
     public List<ItemRankingGeral> obterRankingGeralOrdenado() {
         List<ItemRankingGeral> ranking = new ArrayList<>();
         if (analistas == null || analistas.isEmpty()) {
@@ -146,12 +152,13 @@ public class SimuladorAnalistasCopaDoMundo {
                 List<ResultadoPontuacao> resultados = calcularPontuacaoTotal();
                 int pontosPartidas = somarPontuacao(resultados);
                 int bonusGrupo = calcularBonusTotalDeClassificacao();
-                
+
                 int prestigioFinal = pontosPartidas + bonusGrupo;
 
                 ranking.add(new ItemRankingGeral(a.getNome(), prestigioFinal));
             }
         } finally {
+            // Garante que o analista original seja restaurado mesmo em caso de erro
             this.analistaAtivo = analistaOriginal;
             hidratarPalpitesDoAnalistaAtivo();
         }
@@ -186,6 +193,7 @@ public class SimuladorAnalistasCopaDoMundo {
         return null;
     }
 
+    // Importa palpites do CSV e registra no cofre do analista ativo (H2)
     public ResultadoImportacaoPalpites importarPalpites(String caminhoArquivo) {
         ResultadoImportacaoPalpites resultado = carregador.importarPalpites(caminhoArquivo);
 
@@ -197,26 +205,39 @@ public class SimuladorAnalistasCopaDoMundo {
         return resultado;
     }
 
+    // Salva no cofre apenas os palpites de partidas ainda não ocorridas;
+    // contabiliza os bloqueados por resultado oficial e por snapshot de sync
     private void salvarTodosPalpitesDoCsvNoCofre(ResultadoImportacaoPalpites resultado) {
+        int bloqueadosPorResultado = 0;
+        int bloqueadosPorSnapshot = 0;
         for (Map.Entry<Integer, Palpite> entrada : resultado.getPalpitesLidos().entrySet()) {
-            Partida partida = buscarPartidaPorId(entrada.getKey());
-            // BLINDAGEM DO COFRE: Impede o usuário de contrabandear palpites de jogos já encerrados
-            if (partida != null && partida.getStatus() != StatusPartida.FINALIZADA) {
-                analistaAtivo.registrarPalpite(entrada.getKey(), entrada.getValue());
+            int id = entrada.getKey();
+            Partida partida = buscarPartidaPorId(id);
+            if (partida == null) continue;
+            if (carregador.isNoSnapshot(id)) {
+                bloqueadosPorSnapshot++;
+            } else if (partida.getStatus() == StatusPartida.FINALIZADA) {
+                bloqueadosPorResultado++;
+            } else {
+                analistaAtivo.registrarPalpite(id, entrada.getValue());
             }
         }
+        resultado.setBloqueadosPorResultado(bloqueadosPorResultado);
+        resultado.setBloqueadosPorSnapshot(bloqueadosPorSnapshot);
     }
 
     public void importarResultadosOficiais(String caminhoArquivo) {
         carregador.importarResultadosOficiais(caminhoArquivo);
     }
 
+    // Registra ou atualiza um palpite via UI; bloqueia partidas finalizadas ou no snapshot (H2)
     public boolean atualizarPalpite(int idPartida, int golsCasa, int golsVisitante) {
         if (golsCasa < 0 || golsVisitante < 0) {
             return false;
         }
         Partida partida = buscarPartidaPorId(idPartida);
-        if (partida == null || partida.getStatus() == StatusPartida.FINALIZADA) {
+        if (partida == null || partida.getStatus() == StatusPartida.FINALIZADA
+                || carregador.isNoSnapshot(idPartida)) {
             return false;
         }
         Palpite novoPalpite = new Palpite(golsCasa, golsVisitante);
@@ -249,6 +270,21 @@ public class SimuladorAnalistasCopaDoMundo {
         return motorDePontuacao.somarPontuacao(resultados);
     }
 
+    public List<Partida> getPartidas() {
+        return carregador.getPartidas();
+    }
+
+    // Retorna true apenas se todas as 72 partidas do torneio estiverem FINALIZADAS
+    public boolean todasPartidasFinalizadas() {
+        for (Partida p : carregador.getPartidas()) {
+            if (p.getStatus() != StatusPartida.FINALIZADA) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Soma o bônus de classificação de todos os grupos (H7)
     public int calcularBonusTotalDeClassificacao() {
         int totalBonus = 0;
         for (Grupo g : buscarGrupos()) {
@@ -261,13 +297,18 @@ public class SimuladorAnalistasCopaDoMundo {
         return sincronizacaoWebAtivada;
     }
 
+    // Alterna o modo online/offline: ON salva snapshot e sincroniza;
+    // OFF restaura o snapshot e reidrata os palpites do analista ativo (H10)
     public void alternarSincronizacaoWeb() {
         this.sincronizacaoWebAtivada = !this.sincronizacaoWebAtivada;
         if (this.sincronizacaoWebAtivada) {
             System.out.println("\n[Rede] Sincronização Web ATIVADA. Buscando placares ao vivo...");
+            carregador.salvarSnapshotResultados();
             carregador.sincronizarResultadosOnline();
         } else {
-            System.out.println("\n[Rede] Sincronização Web DESATIVADA. O sistema operará em modo Offline.");
+            System.out.println("\n[Rede] Sincronização Web DESATIVADA. Restaurando resultados anteriores...");
+            carregador.restaurarSnapshotResultados();
+            hidratarPalpitesDoAnalistaAtivo();
         }
     }
 }

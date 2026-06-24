@@ -1,9 +1,7 @@
 package br.ufla.copa.core.service;
 
-/**
- * DTO responsável por encapsular a pontuação de um analista (H09).
- * Implementa Comparable para permitir ordenação decrescente.
- */
+// DTO de um analista no ranking: encapsula nome e pontuação total (H9)
+// Implementa Comparable para ordenação decrescente por pontuação
 public class ItemRankingGeral implements Comparable<ItemRankingGeral> {
     private final String nomeAnalista;
     private final int pontuacaoTotal;
@@ -23,10 +21,10 @@ public class ItemRankingGeral implements Comparable<ItemRankingGeral> {
 
     @Override
     public int compareTo(ItemRankingGeral outro) {
-        // Ordenação Primária: Pontuação decrescente (do maior para o menor)
+        // Ordenação primária: pontuação decrescente
         int comparacaoPontos = Integer.compare(outro.pontuacaoTotal, this.pontuacaoTotal);
-        
-        // Critério de desempate: Ordem alfabética do nome do analista
+
+        // Desempate: ordem alfabética do nome
         if (comparacaoPontos == 0) {
             return this.nomeAnalista.compareToIgnoreCase(outro.nomeAnalista);
         }

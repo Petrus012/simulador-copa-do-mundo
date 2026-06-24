@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Representa um grupo da fase de grupos da Copa do Mundo.
- * Agrega as seleções, partidas e calcula a classificação com desempate correto (H3).
- */
+// Grupo da fase de grupos: agrega seleções e partidas e calcula classificações (H3/H4)
 public class Grupo {
     private final char nome;
     private final List<Selecao> selecoes;
@@ -31,11 +28,7 @@ public class Grupo {
         return Collections.unmodifiableList(partidas);
     }
 
-    /**
-     * Retorna a tabela de classificação calculada e ordenada.
-     * Usa resultados oficiais quando disponíveis. Ignora palpites. (H3/H4).
-     * Cada chamada retorna uma nova lista, sem risco de referências externas desatualizadas.
-     */
+    // Classificação oficial baseada nos resultados importados; recalculada a cada chamada
     public List<EstatisticasSelecao> getClassificacao() {
         List<EstatisticasSelecao> resultado = computarClassificacao();
         resultado.sort(new ClassificacaoComparator());
@@ -54,12 +47,8 @@ public class Grupo {
         }
     }
 
-    /**
-     * Reconstrói a lista de estatísticas do zero a cada chamada,
-     * garantindo que mudanças nos resultados oficiais sejam refletidas.
-     * Registra tanto as estatísticas gerais quanto as de confronto direto,
-     * necessárias para o desempate correto (critérios a, b, c do enunciado H3).
-     */
+    // Reconstrói as estatísticas do zero usando resultados oficiais (FINALIZADA),
+    // registrando também confrontos diretos necessários para o desempate correto (H3)
     private List<EstatisticasSelecao> computarClassificacao() {
         List<EstatisticasSelecao> stats = new ArrayList<>();
         for (Selecao s : selecoes) {
@@ -98,11 +87,7 @@ public class Grupo {
         return stats;
     }
 
-    /**
-     * H07: Retorna a classificação do grupo calculada ESTRITAMENTE pelos palpites,
-     * ignorando os placares oficiais mesmo que a partida já esteja finalizada.
-     * Instancia uma lista temporária para não poluir a classificação oficial do grupo.
-     */
+    // Classificação calculada exclusivamente pelos palpites do analista ativo (H7)
     public List<EstatisticasSelecao> getClassificacaoPelosPalpites() {
         List<EstatisticasSelecao> statsPalpite = new ArrayList<>();
         for (Selecao s : selecoes) {

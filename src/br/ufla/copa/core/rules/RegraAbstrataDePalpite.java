@@ -2,12 +2,8 @@ package br.ufla.copa.core.rules;
 
 import br.ufla.copa.core.contracts.RegraDePontuacaoDePalpite;
 
-/**
- * Base comum às regras R1–R6.
- * Armazena identificador e descrição via construtor, eliminando
- * a repetição de getIdentificador()/getDescricao() em cada subclasse.
- * Subclasses só precisam implementar calcular().
- */
+// Base comum às regras R1–R6: armazena identificador e descrição,
+// deixando apenas calcular() para as subclasses implementarem
 public abstract class RegraAbstrataDePalpite implements RegraDePontuacaoDePalpite {
 
     private final String identificador;

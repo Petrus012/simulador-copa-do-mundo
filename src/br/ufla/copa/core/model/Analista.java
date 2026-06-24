@@ -5,15 +5,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Entidade que representa um perfil de usuário no sistema (H08).
- * Possui um cofre isolado de palpites indexado pelo ID exato da partida.
- */
+// Perfil de analista com cofre isolado de palpites indexado pelo ID da partida (H8)
 public class Analista implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final String nome;
-    // Chave = ID da Partida | Valor = O Palpite daquele analista
+    // chave = ID da partida | valor = palpite do analista
     private final Map<Integer, Palpite> palpites;
 
     public Analista(String nome) {

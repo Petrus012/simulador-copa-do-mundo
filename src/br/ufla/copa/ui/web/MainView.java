@@ -19,11 +19,8 @@ import br.ufla.copa.core.model.Partida;
 import br.ufla.copa.core.model.StatusPartida;
 import br.ufla.copa.core.service.SimuladorAnalistasCopaDoMundo;
 
-/**
- * Dashboard principal da interface web (H12).
- * Exibe abas por grupo com as partidas e a classificação oficial de cada grupo.
- * Toda a lógica de negócio reside na camada core; aqui apenas chamamos o Simulador.
- */
+// Dashboard principal: exibe partidas e classificação oficial por grupo (H12)
+// Eventos de troca de aba implementados com Classe Anônima — sem lambdas
 @Route(value = "", layout = MainLayout.class)
 @PageTitle("Jogos e Resultados | Copa 2026")
 public class MainView extends VerticalLayout {
@@ -54,7 +51,7 @@ public class MainView extends VerticalLayout {
         gridClassificacao = new GridClassificacao();
         add(gridClassificacao);
 
-        // Evento de troca de aba — usa Classe Anônima conforme requisito do trabalho
+        // Troca de aba via Classe Anônima — sem lambdas
         abaGrupos.addSelectedChangeListener(new ComponentEventListener<Tabs.SelectedChangeEvent>() {
             @Override
             public void onComponentEvent(Tabs.SelectedChangeEvent event) {
@@ -146,7 +143,6 @@ public class MainView extends VerticalLayout {
 
     private void carregarDadosDoGrupo(Grupo grupo) {
         gridPartidas.setItems(grupo.getPartidas());
-        // getClassificacao() prioriza resultados oficiais (H4) sobre palpites
         gridClassificacao.setItems(grupo.getClassificacao());
     }
 }

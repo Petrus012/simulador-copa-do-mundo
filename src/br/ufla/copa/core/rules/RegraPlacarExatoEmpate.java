@@ -1,9 +1,7 @@
 package br.ufla.copa.core.rules;
 
-/**
- * R6 — Placar exato de empate (10 pontos).
- * Concede pontos se o analista apostou num empate e cravou o placar exato.
- */
+// R6 — Placar exato de empate (10 pontos)
+// Pontua se o analista cravou o placar exato de uma partida empatada
 public class RegraPlacarExatoEmpate extends RegraAbstrataDePalpite {
 
     public RegraPlacarExatoEmpate() {

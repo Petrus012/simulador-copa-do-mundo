@@ -1,11 +1,7 @@
 package br.ufla.copa.core.rules;
 
-/**
- * R5 — Apostou em empate, mas não foi (4 pontos)
- * Concede pontos se o analista palpitou em empate,
- * mas a partida terminou com um vencedor.
- * É uma regra de consolação por ter apostado "quase certo" no equilíbrio.
- */
+// R5 — Apostou em empate, mas não foi (4 pontos)
+// Regra de consolação: pontua se o analista palpitou em empate mas houve vencedor
 public class RegraApostouEmpateNaoFoi extends RegraAbstrataDePalpite {
 
     public RegraApostouEmpateNaoFoi() {

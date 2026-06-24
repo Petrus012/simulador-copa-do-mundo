@@ -8,12 +8,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.RouterLink;
 
-/**
- * Layout principal da interface web (H12-H14).
- * Fornece cabeçalho fixo e menu lateral com navegação entre as três telas.
- * Estende AppLayout, que já implementa RouterLayout — dispensando qualquer
- * configuração adicional para que as views filhas usem este layout.
- */
+// Layout raiz da interface web: cabeçalho fixo e menu lateral com as três telas (H12–H14)
 public class MainLayout extends AppLayout {
 
     public MainLayout() {

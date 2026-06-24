@@ -2,6 +2,7 @@ package br.ufla.copa.core.model;
 
 import java.util.Objects;
 
+// Representa uma seleção nacional identificada pelo nome
 public class Selecao {
     private final String nome;
 
@@ -24,7 +25,7 @@ public class Selecao {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        
+
         Selecao outraSelecao = (Selecao) obj;
         return Objects.equals(this.nome, outraSelecao.getNome());
     }

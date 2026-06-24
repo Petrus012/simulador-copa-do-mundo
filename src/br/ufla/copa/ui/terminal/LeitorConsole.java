@@ -4,10 +4,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
-/**
- * Gateway exclusivo para leitura do teclado.
- * Encapsula a sujeira do encoding do Windows.
- */
+// Único ponto de leitura do teclado; resolve o encoding corretamente no Windows
 public class LeitorConsole {
     private static final Scanner scanner;
 

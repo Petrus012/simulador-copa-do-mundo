@@ -17,20 +17,12 @@ import java.util.List;
 import br.ufla.copa.core.service.ItemRankingGeral;
 import br.ufla.copa.core.service.SimuladorAnalistasCopaDoMundo;
 
-/**
- * Tela de ranking comparativo de analistas (H14).
- * Lista todos os analistas em ordem decrescente de prestígio.
- * A posição é calculada a partir do índice na lista já ordenada
- * pelo serviço, evitando qualquer lógica de negócio na camada web.
- */
+// Tela de ranking comparativo de analistas ordenados por prestígio (H14)
 @Route(value = "ranking", layout = MainLayout.class)
 @PageTitle("Ranking de Prestígio | Copa 2026")
 public class RankingView extends VerticalLayout {
 
-    /**
-     * DTO interno de apresentação que enriquece ItemRankingGeral com o número
-     * da posição — calculado a partir do índice na lista ordenada pelo serviço.
-     */
+    // DTO de apresentação que adiciona o número de posição ao ItemRankingGeral
     private static class EntradaRanking {
         private final int    posicao;
         private final String nomeAnalista;
@@ -63,7 +55,7 @@ public class RankingView extends VerticalLayout {
         add(gridRanking);
 
         Button botaoAtualizar = new Button("Atualizar Ranking");
-        // Tratamento do clique via Classe Anônima — sem lambdas
+        // Clique via Classe Anônima — sem lambdas
         botaoAtualizar.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
             @Override
             public void onComponentEvent(ClickEvent<Button> event) {
@@ -119,10 +111,7 @@ public class RankingView extends VerticalLayout {
     // Carregamento de dados
     // -----------------------------------------------------------------------
 
-    /**
-     * Obtém o ranking ordenado do serviço e converte para EntradaRanking,
-     * adicionando o número de posição baseado na ordem da lista.
-     */
+    // Obtém o ranking do serviço e converte para EntradaRanking com número de posição
     private void carregarRanking() {
         List<ItemRankingGeral> ranking = simulador.obterRankingGeralOrdenado();
         List<EntradaRanking> entradas  = new ArrayList<>();

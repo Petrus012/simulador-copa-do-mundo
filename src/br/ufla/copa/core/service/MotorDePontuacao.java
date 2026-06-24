@@ -18,20 +18,13 @@ import br.ufla.copa.core.model.Selecao;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Motor de pontuação extensível (H5).
- * Mantém uma coleção de regras e as percorre para calcular a pontuação
- * de um palpite em uma partida, sem nenhuma estrutura if/else sobre
- * qual regra aplicar — basta adicionar uma nova instância à lista para
- * que ela passe a ser considerada automaticamente.
- */
+// Motor extensível de pontuação (H5): percorre a lista de regras sem if/else por tipo;
+// basta adicionar uma instância à lista para ela ser considerada automaticamente
 public class MotorDePontuacao {
 
     private List<RegraDePontuacaoDePalpite> regras;
 
-    /**
-     * Constrói o motor com o conjunto padrão de regras (R1 a R5).
-     */
+    // Inicializa com o conjunto padrão de regras R1–R6
     public MotorDePontuacao() {
         this.regras = new ArrayList<>();
         this.regras.add(new RegraVencedorOuEmpate());
@@ -39,16 +32,11 @@ public class MotorDePontuacao {
         this.regras.add(new RegraGolsDoVencedor());
         this.regras.add(new RegraGolsDoPerdedor());
         this.regras.add(new RegraApostouEmpateNaoFoi());
-        this.regras.add(new RegraPlacarExatoEmpate()); 
+        this.regras.add(new RegraPlacarExatoEmpate());
     }
 
-    /**
-     * Calcula a pontuação obtida em uma partida específica (H5).
-     * Retorna null se a partida não tiver palpite ou não estiver finalizada.
-     *
-     * @param partida a partida a ser avaliada
-     * @return resultado detalhado com pontos por regra, ou null se inaplicável
-     */
+    // Calcula a pontuação de um palpite em uma partida (H5);
+    // retorna null se a partida não tiver palpite ou não estiver finalizada
     public ResultadoPontuacao calcularPontuacaoPartida(Partida partida) {
         if (!partida.temPalpite() || partida.getStatus() != StatusPartida.FINALIZADA) {
             return null;
@@ -69,14 +57,7 @@ public class MotorDePontuacao {
         return resultado;
     }
 
-    /**
-     * Calcula a pontuação total somando todas as partidas com palpite e
-     * resultado oficial (H6). Retorna uma lista de resultados individuais,
-     * um por partida pontuável.
-     *
-     * @param partidas lista completa de partidas
-     * @return lista de ResultadoPontuacao para cada partida avaliável
-     */
+    // Calcula a pontuação total de todas as partidas com palpite e resultado oficial (H6)
     public List<ResultadoPontuacao> calcularPontuacaoTotal(List<Partida> partidas) {
         List<ResultadoPontuacao> resultados = new ArrayList<>();
 
@@ -90,9 +71,7 @@ public class MotorDePontuacao {
         return resultados;
     }
 
-    /**
-     * Soma os pontos de uma lista de resultados (H6).
-     */
+    // Soma os pontos de uma lista de resultados (H6)
     public int somarPontuacao(List<ResultadoPontuacao> resultados) {
         int total = 0;
         for (ResultadoPontuacao r : resultados) {
@@ -105,18 +84,15 @@ public class MotorDePontuacao {
         return regras;
     }
 
-    /**
-     * Calcula o bônus total de Posição Final de um Grupo (H07).
-     * Retorna 0 se o grupo tiver ao menos uma partida não finalizada ("Tudo ou Nada").
-     */
+    // Calcula o bônus de classificação de um grupo (H7);
+    // retorna 0 se qualquer partida do grupo não estiver finalizada ou sem palpite
     public int calcularBonusDoGrupo(Grupo grupo) {
-        // Regra de segurança da H7: Todos os jogos do grupo têm que estar finalizados
         for (Partida p : grupo.getPartidas()) {
             if (p.getStatus() != StatusPartida.FINALIZADA) {
-                return 0; 
+                return 0;
             }
             if (!p.temPalpite()) {
-                return 0; 
+                return 0;
             }
         }
 
@@ -126,13 +102,12 @@ public class MotorDePontuacao {
         int totalBonusGrupo = 0;
         RegraDePontuacaoDeClassificacao regraPosicao = new RegraPosicaoFinal();
 
-        // Compara os 3 primeiros colocados (índices 0, 1 e 2)
+        // Compara os 3 primeiros colocados (posição humana: 1º, 2º, 3º)
         for (int i = 0; i < Math.min(3, Math.min(oficial.size(), palpitada.size())); i++) {
             Selecao selecaoOficial = oficial.get(i).getSelecao();
 
             int posicaoNoPalpite = buscarPosicaoDaSelecao(palpitada, selecaoOficial);
 
-            // Passamos (i + 1) porque a interface do professor exige posição humana (1º, 2º, 3º)
             totalBonusGrupo += regraPosicao.calcularPontosPorPosicao(posicaoNoPalpite, (i + 1));
         }
 

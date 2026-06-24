@@ -5,10 +5,7 @@ import com.vaadin.flow.function.ValueProvider;
 
 import br.ufla.copa.core.model.EstatisticasSelecao;
 
-/**
- * Componente reutilizável que exibe a classificação de um grupo (H12/H13).
- * Encapsula a configuração das colunas para evitar replicação entre views.
- */
+// Componente reutilizável de classificação de grupo — evita duplicação entre MainView e PalpitesView (H12/H13)
 public class GridClassificacao extends Grid<EstatisticasSelecao> {
 
     public GridClassificacao() {

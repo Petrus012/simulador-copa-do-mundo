@@ -5,16 +5,12 @@ import br.ufla.copa.core.model.Partida;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Agrega o resultado detalhado da pontuação de um palpite em uma partida.
- * Mantém a pontuação obtida em cada regra individualmente (H5)
- * e o total acumulado.
- */
+// Resultado detalhado da pontuação de um palpite: pontos por regra e total acumulado (H5)
 public class ResultadoPontuacao {
 
     private final Partida partida;
 
-    // Listas paralelas: identificador da regra, descrição e pontos obtidos
+    // Listas paralelas: identificador, descrição e pontos de cada regra aplicada
     private final List<String> identificadores;
     private final List<String> descricoes;
     private final List<Integer> pontosObtidos;
@@ -29,10 +25,7 @@ public class ResultadoPontuacao {
         this.totalPontos = 0;
     }
 
-    /**
-     * Registra o resultado de uma regra. Regras com 0 pontos também são
-     * registradas para permitir exibição completa ao usuário.
-     */
+    // Registra o resultado de uma regra; regras com 0 pontos também são incluídas para exibição
     public void adicionarRegra(String identificador, String descricao, int pontos) {
         identificadores.add(identificador);
         descricoes.add(descricao);

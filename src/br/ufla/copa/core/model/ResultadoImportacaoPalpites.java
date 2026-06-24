@@ -3,16 +3,14 @@ package br.ufla.copa.core.model;
 import java.util.Collections;
 import java.util.Map;
 
-/**
- * Resultado detalhado de uma importação de palpites via CSV (H2).
- * Carrega os palpites lidos, a contagem de registrados e a de parciais,
- * evitando que o CSV precise ser relido para salvar no cofre do analista.
- */
+// Resultado detalhado de uma importação de palpites via CSV (H2)
 public class ResultadoImportacaoPalpites {
 
     private final int registrados;
     private final int parciais;
     private final Map<Integer, Palpite> palpitesLidos;
+    private int bloqueadosPorResultado;
+    private int bloqueadosPorSnapshot;
 
     public ResultadoImportacaoPalpites(int registrados, int parciais, Map<Integer, Palpite> palpitesLidos) {
         this.registrados = registrados;
@@ -24,12 +22,30 @@ public class ResultadoImportacaoPalpites {
         return registrados;
     }
 
-    /** Linhas com exatamente um dos campos de gol preenchido — palpite incompleto. */
+    // Linhas com exatamente um dos campos de gol preenchido — palpite incompleto
     public int getParciais() {
         return parciais;
     }
 
-    /** Todos os palpites válidos lidos do CSV, incluindo os de partidas já finalizadas. */
+    // Palpites válidos ignorados porque a partida já tem resultado oficial
+    public int getBloqueadosPorResultado() {
+        return bloqueadosPorResultado;
+    }
+
+    public void setBloqueadosPorResultado(int bloqueadosPorResultado) {
+        this.bloqueadosPorResultado = bloqueadosPorResultado;
+    }
+
+    // Palpites válidos ignorados porque o jogo já ocorreu antes da sync web
+    public int getBloqueadosPorSnapshot() {
+        return bloqueadosPorSnapshot;
+    }
+
+    public void setBloqueadosPorSnapshot(int bloqueadosPorSnapshot) {
+        this.bloqueadosPorSnapshot = bloqueadosPorSnapshot;
+    }
+
+    // Todos os palpites lidos do CSV, incluindo os de partidas já finalizadas
     public Map<Integer, Palpite> getPalpitesLidos() {
         return Collections.unmodifiableMap(palpitesLidos);
     }

@@ -29,11 +29,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// Responsável por toda leitura/escrita de dados: CSV de partidas, palpites e resultados,
+// persistência binária de analistas e sincronização HTTP dos resultados oficiais (H1/H2/H4/H8/H10)
 public class CarregadorDeDados {
     private static final String CAMINHO_PARTIDAS = "src/resources/partidas.csv";
     private static final String CAMINHO_ANALISTAS_BIN = "src/resources/analistas.dat";
-    
-    // H10: Constantes para a requisição HTTP
+
+    // URL e cache local para a sincronização online (H10)
     private static final String URL_RESULTADOS_WEB = "https://raw.githubusercontent.com/caburu/atualizador-resultados-partidas/main/resultados.csv";
     private static final String CAMINHO_WEB_CACHE = "src/resources/resultados_web_cache.csv";
 
@@ -41,6 +43,8 @@ public class CarregadorDeDados {
     private List<Estadio> estadios;
     private List<Selecao> selecoes;
     private List<Partida> partidas;
+    // Snapshot dos resultados antes da sync web; null quando sync está desativada
+    private Map<Integer, int[]> snapshotResultados;
 
     public CarregadorDeDados() {
         this.grupos = new ArrayList<>();
@@ -52,16 +56,12 @@ public class CarregadorDeDados {
     }
 
     // -----------------------------------------------------------------------
-    // H10: SINCRONIZAÇÃO VIA REDE
+    // Sincronização online (H10)
     // -----------------------------------------------------------------------
 
-    /**
-     * Conecta à URL remota, baixa o CSV mais recente para um arquivo temporário 
-     * local e engatilha a atualização oficial das partidas.
-     */
+    // Baixa o CSV remoto e importa os resultados; timeout de 5 s para não travar o boot
     public void sincronizarResultadosOnline() {
         try {
-            // Configura timeout de 5s para o boot não travar se o GitHub cair
             HttpClient cliente = HttpClient.newBuilder()
                     .connectTimeout(Duration.ofSeconds(5))
                     .build();
@@ -73,9 +73,8 @@ public class CarregadorDeDados {
 
             Path caminhoDestino = Path.of(CAMINHO_WEB_CACHE);
 
-            // Baixa o arquivo da internet direto para o HD
             HttpResponse<Path> resposta = cliente.send(
-                    requisicao, 
+                    requisicao,
                     HttpResponse.BodyHandlers.ofFile(caminhoDestino)
             );
 
@@ -90,8 +89,39 @@ public class CarregadorDeDados {
         }
     }
 
+    // Salva quais partidas estão FINALIZADA antes da sync web (base para o snapshot)
+    public void salvarSnapshotResultados() {
+        snapshotResultados = new HashMap<>();
+        for (Partida p : partidas) {
+            if (p.getStatus() == StatusPartida.FINALIZADA) {
+                snapshotResultados.put(p.getId(), new int[]{p.getGolsTimeCasaOficial(), p.getGolsTimeVisitanteOficial()});
+            }
+        }
+    }
+
+    // Indica se a partida estava FINALIZADA antes da sync web (bloqueia palpites mesmo offline)
+    public boolean isNoSnapshot(int idPartida) {
+        return snapshotResultados != null && snapshotResultados.containsKey(idPartida);
+    }
+
+    // Desfaz a sync web: limpa todos os resultados e reaplica apenas os do snapshot
+    public void restaurarSnapshotResultados() {
+        for (Partida p : partidas) {
+            p.limparResultadoOficial();
+        }
+        if (snapshotResultados != null) {
+            for (Map.Entry<Integer, int[]> entrada : snapshotResultados.entrySet()) {
+                Partida p = buscarPartidaPorId(entrada.getKey());
+                if (p != null) {
+                    p.setResultadoOficial(entrada.getValue()[0], entrada.getValue()[1]);
+                }
+            }
+        }
+        snapshotResultados = null;
+    }
+
     // -----------------------------------------------------------------------
-    // Persistência Binária (H08)
+    // Persistência binária de analistas (H8)
     // -----------------------------------------------------------------------
 
     public void salvarAnalistasNoHD(List<Analista> analistas) {
@@ -105,7 +135,7 @@ public class CarregadorDeDados {
     @SuppressWarnings("unchecked")
     public List<Analista> carregarAnalistasDoHD() {
         Path caminho = Path.of(CAMINHO_ANALISTAS_BIN);
-        if (!Files.exists(caminho)) return null; 
+        if (!Files.exists(caminho)) return null;
 
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(CAMINHO_ANALISTAS_BIN))) {
             return (List<Analista>) ois.readObject();
@@ -115,9 +145,10 @@ public class CarregadorDeDados {
     }
 
     // -----------------------------------------------------------------------
-    // Importações originais (H1, H2, H4)
+    // Importações CSV (H1, H2, H4)
     // -----------------------------------------------------------------------
 
+    // Lê partidas.csv e reconstrói grupos, seleções e partidas do zero (H1)
     public void importarPartidas(String caminhoArquivo) {
         Path caminho = Path.of(caminhoArquivo);
         grupos.clear();
@@ -137,7 +168,7 @@ public class CarregadorDeDados {
                 Selecao timeDaCasa = buscarOuCriarSelecao(campos[3].trim());
                 Selecao timeVisitante = buscarOuCriarSelecao(campos[4].trim());
                 buscarOuCriarEstadio(campos[5].trim(), campos[6].trim());
-                
+
                 char idGrupo = campos[7].trim().charAt(0);
                 Grupo grupo = buscarOuCriarGrupo(idGrupo);
 
@@ -153,12 +184,8 @@ public class CarregadorDeDados {
         }
     }
 
-    /**
-     * Lê todos os palpites válidos de um CSV e os retorna como Map id→Palpite.
-     * Não aplica nenhuma regra de negócio (FINALIZADA, etc.) — apenas faz o parsing.
-     * Usado por importarPalpites() e pelo cofre do Analista (H8).
-     * O array parciais recebe em [0] o total de linhas com preenchimento parcial (H2).
-     */
+    // Faz apenas o parsing do CSV de palpites, sem aplicar regras de negócio;
+    // preenche parciais[0] com o total de linhas com apenas um gol informado (H2)
     public Map<Integer, Palpite> lerPalpitesDoArquivo(String caminhoArquivo, int[] parciais) {
         Map<Integer, Palpite> resultado = new HashMap<>();
         parciais[0] = 0;
@@ -193,6 +220,7 @@ public class CarregadorDeDados {
         return resultado;
     }
 
+    // Importa palpites do CSV e aplica nas partidas ainda não finalizadas (H2)
     public ResultadoImportacaoPalpites importarPalpites(String caminhoArquivo) {
         int[] parciais = new int[1];
         Map<Integer, Palpite> palpites = lerPalpitesDoArquivo(caminhoArquivo, parciais);
@@ -207,11 +235,17 @@ public class CarregadorDeDados {
         return new ResultadoImportacaoPalpites(registrados, parciais[0], palpites);
     }
 
+    // Importa resultados oficiais de forma autoritativa: limpa tudo antes de aplicar o CSV,
+    // garantindo que partidas ausentes voltem para AGENDADA (H4)
     public void importarResultadosOficiais(String caminhoArquivo) {
         Path caminho = Path.of(caminhoArquivo);
 
+        for (Partida p : partidas) {
+            p.limparResultadoOficial();
+        }
+
         try (BufferedReader leitor = Files.newBufferedReader(caminho, StandardCharsets.UTF_8)) {
-            String linha = leitor.readLine(); 
+            String linha = leitor.readLine();
             while ((linha = leitor.readLine()) != null) {
                 if (linha.isBlank()) continue;
 

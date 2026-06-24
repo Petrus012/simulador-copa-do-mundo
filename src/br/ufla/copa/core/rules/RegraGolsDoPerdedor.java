@@ -1,11 +1,8 @@
 package br.ufla.copa.core.rules;
 
-/**
- * R4 — Gols do Perdedor (2 pontos)
- * Concede pontos se o analista acertou o número exato de gols marcados
- * pela equipe perdedora. Em caso de empate, a regra não se aplica
- * (não há perdedor), retornando 0.
- */
+// R4 — Gols do Perdedor (2 pontos)
+// Pontua se o analista acertou o número exato de gols do time perdedor;
+// em caso de empate (sem perdedor) retorna 0
 public class RegraGolsDoPerdedor extends RegraAbstrataDePalpite {
 
     public RegraGolsDoPerdedor() {
@@ -21,7 +18,6 @@ public class RegraGolsDoPerdedor extends RegraAbstrataDePalpite {
             return 0;
         }
 
-        // Determina quantos gols fez o perdedor no resultado oficial
         int golsPerdedorOficial;
         int golsPerdedorPalpite;
 

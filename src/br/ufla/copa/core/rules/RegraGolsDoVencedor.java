@@ -1,11 +1,8 @@
 package br.ufla.copa.core.rules;
 
-/**
- * R3 — Gols do Vencedor (8 pontos)
- * Concede pontos se o analista acertou o número exato de gols marcados
- * pela equipe vencedora. Em caso de empate, a regra não se aplica
- * (não há vencedor), retornando 0.
- */
+// R3 — Gols do Vencedor (8 pontos)
+// Pontua se o analista acertou o número exato de gols do time vencedor;
+// em caso de empate (sem vencedor) retorna 0
 public class RegraGolsDoVencedor extends RegraAbstrataDePalpite {
 
     public RegraGolsDoVencedor() {
@@ -21,7 +18,6 @@ public class RegraGolsDoVencedor extends RegraAbstrataDePalpite {
             return 0;
         }
 
-        // Determina quantos gols fez o vencedor no resultado oficial
         int golsVencedorOficial;
         int golsVencedorPalpite;
 
