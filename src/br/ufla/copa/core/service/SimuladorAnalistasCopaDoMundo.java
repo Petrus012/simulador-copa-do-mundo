@@ -25,16 +25,11 @@ public class SimuladorAnalistasCopaDoMundo {
 
     private List<Analista> analistas;
     private Analista analistaAtivo;
-    private boolean sincronizacaoWebAtivada = true;
+    private boolean sincronizacaoWebAtivada = false;
 
     private SimuladorAnalistasCopaDoMundo() {
         this.carregador = new CarregadorDeDados();
         this.motorDePontuacao = new MotorDePontuacao();
-
-        // Sincroniza resultados online ao iniciar (H10)
-        //System.out.println("[Rede] Sincronizando resultados online na inicialização...");
-        //carregador.salvarSnapshotResultados();
-        //carregador.sincronizarResultadosOnline();
 
         List<Analista> salvos = carregador.carregarAnalistasDoHD();
         if (salvos != null && !salvos.isEmpty()) {
