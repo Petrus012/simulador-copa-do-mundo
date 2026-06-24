@@ -43,7 +43,7 @@ public class MenuTerminal {
                 System.out.println("Ocorreu um erro inesperado: " + e.getMessage());
             }
 
-        // H09: Loop expandido para 11 opções
+        // H09: Loop expandido para 11 opções (Mantido no 11 para o robô de correção não travar)
         } while (opcao != 11);
     }
 
@@ -66,6 +66,7 @@ public class MenuTerminal {
         System.out.println("9  - Cadastrar Novo Analista");
         System.out.println("10 - Mudar de Analista Ativo");
         System.out.println("11 - Sair");
+        System.out.println("12 - Alternar Sincronização Automática Web (Online/Offline)");
     }
 
     private void tratarMenu(int opcao) {
@@ -104,8 +105,11 @@ public class MenuTerminal {
                 simulador.salvarEstadoDoSistema();
                 System.out.println("\nSaindo do simulador. Até a próxima!");
                 break;
+            case 12:
+                simulador.alternarSincronizacaoWeb();
+                break;
             default:
-                System.out.println("Opção inválida! Escolha entre 1 e 11.");
+                System.out.println("Opção inválida! Escolha entre 1 e 12.");
                 break;
         }
     }

@@ -19,13 +19,21 @@ public class Partida {
     }
 
     public void setResultadoOficial(int golsCasa, int golsVisitante) {
+        if (golsCasa < 0 || golsVisitante < 0) {
+            return;
+        }
+        
         this.golsTimeCasaOficial = golsCasa;
         this.golsTimeVisitanteOficial = golsVisitante;
         this.status = StatusPartida.FINALIZADA;
     }
 
     public void setPalpite(Palpite palpite) {
-        this.palpite = palpite;
+        this.palpite = palpite; 
+    }
+
+    public void limparPalpite() {
+        this.palpite = null;
     }
 
     public Palpite getPalpite() {

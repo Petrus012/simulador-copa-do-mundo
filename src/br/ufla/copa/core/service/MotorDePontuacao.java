@@ -115,6 +115,9 @@ public class MotorDePontuacao {
             if (p.getStatus() != StatusPartida.FINALIZADA) {
                 return 0; 
             }
+            if (!p.temPalpite()) {
+                return 0; 
+            }
         }
 
         List<EstatisticasSelecao> oficial = grupo.getClassificacao();

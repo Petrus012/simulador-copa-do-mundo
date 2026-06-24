@@ -227,6 +227,8 @@ public class CarregadorDeDados {
                 int golsCasa = Integer.parseInt(golsCasaStr);
                 int golsVis = Integer.parseInt(golsVisStr);
 
+                if (golsCasa < 0 || golsVis < 0) continue;
+
                 Partida partida = buscarPartidaPorId(idPartida);
                 if (partida != null) {
                     partida.setResultadoOficial(golsCasa, golsVis);

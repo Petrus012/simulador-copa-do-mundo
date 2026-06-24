@@ -33,7 +33,7 @@ public class Grupo {
 
     /**
      * Retorna a tabela de classificação calculada e ordenada.
-     * Usa resultados oficiais quando disponíveis; palpites caso contrário (H3/H4).
+     * Usa resultados oficiais quando disponíveis. Ignora palpites. (H3/H4).
      * Cada chamada retorna uma nova lista, sem risco de referências externas desatualizadas.
      */
     public List<EstatisticasSelecao> getClassificacao() {
@@ -56,7 +56,7 @@ public class Grupo {
 
     /**
      * Reconstrói a lista de estatísticas do zero a cada chamada,
-     * garantindo que mudanças nos palpites ou resultados sejam refletidas.
+     * garantindo que mudanças nos resultados oficiais sejam refletidas.
      * Registra tanto as estatísticas gerais quanto as de confronto direto,
      * necessárias para o desempate correto (critérios a, b, c do enunciado H3).
      */
@@ -79,10 +79,6 @@ public class Grupo {
             if (p.getStatus() == StatusPartida.FINALIZADA) {
                 golsCasa = p.getGolsTimeCasaOficial();
                 golsVisitante = p.getGolsTimeVisitanteOficial();
-                temDados = true;
-            } else if (p.temPalpite()) {
-                golsCasa = p.getPalpite().getGolsTimeCasa();
-                golsVisitante = p.getPalpite().getGolsTimeVisitante();
                 temDados = true;
             } else {
                 temDados = false;
