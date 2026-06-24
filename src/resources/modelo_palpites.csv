@@ -1,73 +1,73 @@
 id,timeA,gols_timeA,x,gols_timeB,timeB
 1,México,2,x,0,África do Sul
-2,Coreia do Sul,1,x,1,República Tcheca
-3,República Tcheca,0,x,1,África do Sul
-4,México,2,x,1,Coreia do Sul
-5,África do Sul,1,x,2,Coreia do Sul
+2,Coreia do Sul,1,x,0,República Tcheca
+3,República Tcheca,3,x,1,África do Sul
+4,México,1,x,1,Coreia do Sul
+5,África do Sul,0,x,2,Coreia do Sul
 6,República Tcheca,1,x,2,México
-7,Canadá,3,x,1,Bósnia e Herzegovina
-8,Catar,0,x,2,Suíça
-9,Suíça,3,x,0,Bósnia e Herzegovina
-10,Canadá,4,x,0,Catar
-11,Bósnia e Herzegovina,1,x,2,Catar
-12,Suíça,1,x,3,Canadá
+7,Canadá,1,x,1,Bósnia e Herzegovina
+8,Catar,0,x,3,Suíça
+9,Suíça,2,x,1,Bósnia e Herzegovina
+10,Canadá,2,x,0,Catar
+11,Bósnia e Herzegovina,1,x,0,Catar
+12,Suíça,2,x,1,Canadá
 19,Brasil,2,x,1,Marrocos
 20,Haiti,0,x,2,Escócia
 21,Escócia,1,x,2,Marrocos
 22,Brasil,3,x,0,Haiti
 23,Marrocos,2,x,0,Haiti
-24,Escócia,1,x,2,Brasil
-13,Estados Unidos,3,x,0,Paraguai
-14,Austrália,1,x,2,Turquia
-15,Estados Unidos,2,x,1,Austrália
+24,Escócia,0,x,2,Brasil
+13,Estados Unidos,2,x,1,Paraguai
+14,Austrália,0,x,2,Turquia
+15,Estados Unidos,1,x,1,Austrália
 16,Turquia,2,x,1,Paraguai
-17,Paraguai,1,x,2,Austrália
-18,Turquia,1,x,2,Estados Unidos
-25,Alemanha,4,x,0,Curaçao
-26,Costa do Marfim,1,x,2,Equador
-27,Alemanha,2,x,1,Costa do Marfim
-28,Equador,3,x,1,Curaçao
+17,Paraguai,2,x,1,Austrália
+18,Turquia,2,x,2,Estados Unidos
+25,Alemanha,5,x,1,Curaçao
+26,Costa do Marfim,1,x,1,Equador
+27,Alemanha,3,x,1,Costa do Marfim
+28,Equador,2,x,0,Curaçao
 29,Curaçao,0,x,2,Costa do Marfim
 30,Equador,1,x,2,Alemanha
-31,Holanda,2,x,1,Japão
-32,Suécia,2,x,0,Tunísia
-33,Holanda,1,x,0,Suécia
-34,Tunísia,1,x,2,Japão
-35,Japão,2,x,1,Suécia
+31,Holanda,1,x,2,Japão
+32,Suécia,1,x,0,Tunísia
+33,Holanda,2,x,1,Suécia
+34,Tunísia,0,x,2,Japão
+35,Japão,1,x,1,Suécia
 36,Tunísia,0,x,2,Holanda
-37,Bélgica,1,x,1,Egito
-38,Irã,2,x,0,Nova Zelândia
-39,Bélgica,0,x,1,Irã
-40,Nova Zelândia,1,x,0,Egito
-41,Egito,2,x,0,Irã
-42,Nova Zelândia,1,x,0,Bélgica
-43,Espanha,0,x,1,Cabo Verde
-44,Arábia Saudita,1,x,0,Uruguai
-45,Espanha,0,x,1,Arábia Saudita
-46,Uruguai,1,x,2,Cabo Verde
-47,Cabo Verde,1,x,0,Arábia Saudita
-48,Uruguai,2,x,0,Espanha
-49,França,0,x,2,Senegal
-50,Iraque,1,x,0,Noruega
-51,França,1,x,1,Iraque
-52,Noruega,0,x,2,Senegal
-53,Senegal,0,x,1,Iraque
-54,Noruega,2,x,0,França
-55,Argentina,0,x,2,Argélia
-56,Áustria,0,x,1,Jordânia
-57,Argentina,0,x,2,Áustria
-58,Jordânia,1,x,0,Argélia
-59,Argélia,2,x,0,Áustria
-60,Jordânia,2,x,0,Argentina
-61,Portugal,1,x,1,RD Congo
-62,Uzbequistão,1,x,0,Colômbia
-63,Portugal,0,x,1,Uzbequistão
-64,Colômbia,0,x,2,RD Congo
-65,RD Congo,2,x,0,Uzbequistão
-66,Colômbia,2,x,0,Portugal
-67,Inglaterra,0,x,1,Croácia
+37,Bélgica,2,x,1,Egito
+38,Irã,1,x,0,Nova Zelândia
+39,Bélgica,2,x,0,Irã
+40,Nova Zelândia,0,x,1,Egito
+41,Egito,2,x,1,Irã
+42,Nova Zelândia,0,x,3,Bélgica
+43,Espanha,3,x,0,Cabo Verde
+44,Arábia Saudita,0,x,2,Uruguai
+45,Espanha,3,x,0,Arábia Saudita
+46,Uruguai,2,x,0,Cabo Verde
+47,Cabo Verde,0,x,1,Arábia Saudita
+48,Uruguai,1,x,2,Espanha
+49,França,3,x,1,Senegal
+50,Iraque,0,x,2,Noruega
+51,França,4,x,0,Iraque
+52,Noruega,1,x,1,Senegal
+53,Senegal,2,x,0,Iraque
+54,Noruega,1,x,2,França
+55,Argentina,2,x,1,Argélia
+56,Áustria,2,x,0,Jordânia
+57,Argentina,2,x,0,Áustria
+58,Jordânia,0,x,2,Argélia
+59,Argélia,1,x,1,Áustria
+60,Jordânia,0,x,3,Argentina
+61,Portugal,3,x,0,RD Congo
+62,Uzbequistão,0,x,2,Colômbia
+63,Portugal,2,x,0,Uzbequistão
+64,Colômbia,2,x,0,RD Congo
+65,RD Congo,1,x,0,Uzbequistão
+66,Colômbia,1,x,2,Portugal
+67,Inglaterra,2,x,1,Croácia
 68,Gana,2,x,0,Panamá
-69,Inglaterra,0,x,2,Gana
-70,Panamá,1,x,0,Croácia
-71,Croácia,2,x,0,Gana
-72,Panamá,1,x,0,Inglaterra
+69,Inglaterra,2,x,0,Gana
+70,Panamá,0,x,2,Croácia
+71,Croácia,1,x,0,Gana
+72,Panamá,0,x,3,Inglaterra

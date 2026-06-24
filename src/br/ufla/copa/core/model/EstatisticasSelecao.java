@@ -3,11 +3,8 @@ package br.ufla.copa.core.model;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Armazena as estatísticas de uma seleção em um grupo.
- * Além das estatísticas gerais, mantém estatísticas de confronto
- * direto contra cada adversário, necessárias para o desempate (H3).
- */
+// Acumula pontos, vitórias, saldo e gols de uma seleção em um grupo,
+// incluindo estatísticas de confronto direto para os critérios de desempate (H3)
 public class EstatisticasSelecao {
     private Selecao selecao;
     private int pontos;
@@ -15,9 +12,7 @@ public class EstatisticasSelecao {
     private int saldoGols;
     private int golsPro;
 
-    // Estatísticas de confronto direto contra adversários específicos
-    // Cada entrada é um par [EstatisticasSelecao do adversário, pontos no confronto]
-    // Usamos listas paralelas para evitar lambdas/Map com generics complexos
+    // Listas paralelas de adversários e suas respectivas estatísticas de confronto direto
     private List<Selecao> adversariosConfrontoDirecto;
     private List<Integer> pontosConfrontoDirecto;
     private List<Integer> saldoConfrontoDirecto;
@@ -36,9 +31,7 @@ public class EstatisticasSelecao {
         this.golsProConfrontoDirecto = new ArrayList<>();
     }
 
-    /**
-     * Registra o resultado de uma partida geral do grupo.
-     */
+    // Atualiza pontos, vitórias, saldo e gols com o resultado de uma partida do grupo
     public void registrarResultado(int golsFeitos, int golsSofridos) {
         this.golsPro += golsFeitos;
         this.saldoGols += (golsFeitos - golsSofridos);
@@ -51,10 +44,7 @@ public class EstatisticasSelecao {
         }
     }
 
-    /**
-     * Registra o resultado de um confronto direto contra um adversário específico.
-     * Usado para calcular os critérios de desempate a, b e c do regulamento.
-     */
+    // Acumula os dados do confronto direto contra um adversário específico (desempate a, b, c)
     public void registrarConfrontoDirecto(Selecao adversario, int golsFeitos, int golsSofridos) {
         int indice = buscarIndiceAdversario(adversario);
 
@@ -79,27 +69,21 @@ public class EstatisticasSelecao {
         }
     }
 
-    /**
-     * Retorna os pontos obtidos no confronto direto contra uma seleção específica.
-     */
+    // Retorna os pontos obtidos no confronto direto contra o adversário informado
     public int getPontosConfrontoDirecto(Selecao adversario) {
         int indice = buscarIndiceAdversario(adversario);
         if (indice == -1) return 0;
         return pontosConfrontoDirecto.get(indice);
     }
 
-    /**
-     * Retorna o saldo de gols no confronto direto contra uma seleção específica.
-     */
+    // Retorna o saldo de gols no confronto direto contra o adversário informado
     public int getSaldoConfrontoDirecto(Selecao adversario) {
         int indice = buscarIndiceAdversario(adversario);
         if (indice == -1) return 0;
         return saldoConfrontoDirecto.get(indice);
     }
 
-    /**
-     * Retorna os gols marcados no confronto direto contra uma seleção específica.
-     */
+    // Retorna os gols marcados no confronto direto contra o adversário informado
     public int getGolsProConfrontoDirecto(Selecao adversario) {
         int indice = buscarIndiceAdversario(adversario);
         if (indice == -1) return 0;

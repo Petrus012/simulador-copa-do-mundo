@@ -1,6 +1,11 @@
 package br.ufla.copa.core.model;
 
-public class Palpite {
+import java.io.Serializable;
+
+// Palpite imutável de uma partida — serializado junto com o Analista (H8)
+public class Palpite implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private final int golsTimeCasa;
     private final int golsTimeVisitante;
 

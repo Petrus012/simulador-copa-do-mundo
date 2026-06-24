@@ -1,21 +1,12 @@
-package br.ufla.copa.core.contracts;
+package br.ufla.copa.core.rules;
 
-/**
- * R4 — Gols do Perdedor (2 pontos)
- * Concede pontos se o analista acertou o número exato de gols marcados
- * pela equipe perdedora. Em caso de empate, a regra não se aplica
- * (não há perdedor), retornando 0.
- */
-public class RegraGolsDoPerdedor implements RegraDePontuacaoDePalpite {
+// R4 — Gols do Perdedor (2 pontos)
+// Pontua se o analista acertou o número exato de gols do time perdedor;
+// em caso de empate (sem perdedor) retorna 0
+public class RegraGolsDoPerdedor extends RegraAbstrataDePalpite {
 
-    @Override
-    public String getIdentificador() {
-        return "R4";
-    }
-
-    @Override
-    public String getDescricao() {
-        return "Acertou os gols do perdedor";
+    public RegraGolsDoPerdedor() {
+        super("R4", "Acertou os gols do perdedor");
     }
 
     @Override
@@ -27,16 +18,17 @@ public class RegraGolsDoPerdedor implements RegraDePontuacaoDePalpite {
             return 0;
         }
 
-        // Determina quantos gols fez o perdedor no resultado oficial
         int golsPerdedorOficial;
         int golsPerdedorPalpite;
 
         if (oficialGolsTimeA > oficialGolsTimeB) {
-            // Time B perdeu
+            // Time A venceu, Time B perdeu — palpite também deve ter previsto vitória de A
+            if (palpiteGolsTimeA <= palpiteGolsTimeB) return 0;
             golsPerdedorOficial = oficialGolsTimeB;
             golsPerdedorPalpite = palpiteGolsTimeB;
         } else {
-            // Time A perdeu
+            // Time B venceu, Time A perdeu — palpite também deve ter previsto vitória de B
+            if (palpiteGolsTimeB <= palpiteGolsTimeA) return 0;
             golsPerdedorOficial = oficialGolsTimeA;
             golsPerdedorPalpite = palpiteGolsTimeA;
         }

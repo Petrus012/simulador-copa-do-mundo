@@ -1,34 +1,28 @@
 package br.ufla.copa.ui.terminal;
 
 import java.util.List;
-import java.util.Scanner;
 
+import br.ufla.copa.core.model.Analista;
 import br.ufla.copa.core.model.Estadio;
 import br.ufla.copa.core.model.Grupo;
 import br.ufla.copa.core.model.Partida;
 import br.ufla.copa.core.model.EstatisticasSelecao;
+import br.ufla.copa.core.model.ResultadoImportacaoPalpites;
+import br.ufla.copa.core.service.ItemRankingGeral;
 import br.ufla.copa.core.service.ResultadoPontuacao;
 import br.ufla.copa.core.service.SimuladorAnalistasCopaDoMundo;
 
-/**
- * Classe que trata a interação com o usuário via terminal.
- * Cobre as histórias H1 a H6 da Fase 1 e Fase 2.
- */
+// Interface de terminal: exibe menus, lê entradas e delega toda lógica ao Simulador
 public class MenuTerminal {
     private static final String CAMINHO_PADRAO_PALPITES = "src/resources/modelo_palpites.csv";
     private static final String CAMINHO_PADRAO_RESULTADOS = "src/resources/resultados.csv";
 
-    private Scanner entrada;
     private SimuladorAnalistasCopaDoMundo simulador;
 
     public MenuTerminal() {
-        entrada = new Scanner(System.in);
         simulador = SimuladorAnalistasCopaDoMundo.getInstance();
     }
 
-    /**
-     * Inicia o loop principal do menu via terminal.
-     */
     public void iniciar() {
         System.out.println("\nIniciando interface via terminal...\n");
 
@@ -38,7 +32,7 @@ public class MenuTerminal {
             System.out.print("\nDigite sua opção: ");
 
             try {
-                String linha = entrada.nextLine().trim();
+                String linha = LeitorConsole.lerLinha();
                 if (linha.isEmpty()) continue;
 
                 opcao = Integer.parseInt(linha);
@@ -50,21 +44,29 @@ public class MenuTerminal {
                 System.out.println("Ocorreu um erro inesperado: " + e.getMessage());
             }
 
-        } while (opcao != 8);
-
-        entrada.close();
+        } while (opcao != 11);
     }
 
     private void exibirMenu() {
-        System.out.println("\n--- SIMULADOR DA COPA DO MUNDO 2026 ---");
-        System.out.println("1 - Exibir Estádios");
-        System.out.println("2 - Exibir Partidas por Grupo");
-        System.out.println("3 - Importar Palpites");
-        System.out.println("4 - Importar Resultados Oficiais");
-        System.out.println("5 - Exibir Tabela de Classificação do Grupo");
-        System.out.println("6 - Pontuação de Uma Partida");
-        System.out.println("7 - Pontuação Total dos Palpites");
-        System.out.println("8 - Sair");
+        String nomeAtivo = (simulador.getAnalistaAtivo() != null)
+                ? simulador.getAnalistaAtivo().getNome()
+                : "Nenhum";
+
+        System.out.println("\n==============================================================================");
+        System.out.println("--- SIMULADOR DA COPA DO MUNDO 2026  |  Analista logado: [" + nomeAtivo + "] ---");
+        System.out.println("==============================================================================");
+        System.out.println("1  - Exibir Estádios");
+        System.out.println("2  - Exibir Partidas por Grupo");
+        System.out.println("3  - Importar Palpites (Registra no cofre do analista atual)");
+        System.out.println("4  - Importar Resultados Oficiais");
+        System.out.println("5  - Exibir Tabela de Classificação do Grupo");
+        System.out.println("6  - Pontuação de Uma Partida");
+        System.out.println("7  - Pontuação Total Acumulada do Analista Atual");
+        System.out.println("8  - Exibir Ranking Geral de Prestígio (H09)");
+        System.out.println("9  - Cadastrar Novo Analista");
+        System.out.println("10 - Mudar de Analista Ativo");
+        System.out.println("11 - Sair");
+        System.out.println("12 - Alternar Sincronização Automática Web (Online/Offline)");
     }
 
     private void tratarMenu(int opcao) {
@@ -91,16 +93,100 @@ public class MenuTerminal {
                 exibirPontuacaoTotal();
                 break;
             case 8:
-                System.out.println("Saindo do programa...");
+                exibirRankingGeral();
+                break;
+            case 9:
+                cadastrarNovoAnalista();
+                break;
+            case 10:
+                mudarAnalistaAtivo();
+                break;
+            case 11:
+                simulador.salvarEstadoDoSistema();
+                System.out.println("\nSaindo do simulador. Até a próxima!");
+                break;
+            case 12:
+                simulador.alternarSincronizacaoWeb();
                 break;
             default:
-                System.out.println("Opção inválida! Escolha entre 1 e 8.");
+                System.out.println("Opção inválida! Escolha entre 1 e 12.");
                 break;
         }
     }
 
     // -----------------------------------------------------------------------
-    // H1 — Exibição de estádios e partidas por grupo
+    // Ranking geral de prestígio (H9)
+    // -----------------------------------------------------------------------
+
+    private void exibirRankingGeral() {
+        List<ItemRankingGeral> ranking = simulador.obterRankingGeralOrdenado();
+
+        if (ranking.isEmpty()) {
+            System.out.println("\nNenhum analista cadastrado no sistema.");
+            return;
+        }
+
+        System.out.println("\n==============================================================================");
+        System.out.println("------------------------- RANKING GERAL DE PRESTÍGIO -------------------------");
+        System.out.println("==============================================================================");
+        System.out.printf("%-5s | %-42s | %-15s%n", "Pos", "Analista Esportivo", "Prestígio Total");
+        System.out.println("------------------------------------------------------------------------------");
+
+        for (int i = 0; i < ranking.size(); i++) {
+            ItemRankingGeral item = ranking.get(i);
+            System.out.printf("%2dº   | %-42s | %10d pts%n",
+                    (i + 1),
+                    item.getNomeAnalista(),
+                    item.getPontuacaoTotal());
+        }
+        System.out.println("==============================================================================");
+    }
+
+    // -----------------------------------------------------------------------
+    // Gerenciamento de analistas (H8)
+    // -----------------------------------------------------------------------
+
+    private void mudarAnalistaAtivo() {
+        List<Analista> lista = simulador.getAnalistas();
+        System.out.println("\nPerfis cadastrados no sistema:");
+        for (int i = 0; i < lista.size(); i++) {
+            System.out.println(" " + (i + 1) + ". " + lista.get(i).toString());
+        }
+
+        System.out.print("\nDigite exatamente o NOME do analista para assumir o controle: ");
+        String nomeEscolhido = LeitorConsole.lerLinha();
+
+        if (nomeEscolhido.isEmpty()) {
+            System.out.println("Operação cancelada.");
+            return;
+        }
+
+        if (simulador.selecionarAnalista(nomeEscolhido)) {
+            System.out.println("\n[SUCESSO] O sistema agora está operando sob a perspectiva de: " + nomeEscolhido);
+        } else {
+            System.out.println("\n[ERRO] Analista '" + nomeEscolhido + "' não encontrado.");
+        }
+    }
+
+    private void cadastrarNovoAnalista() {
+        System.out.print("\nDigite o nome do novo Analista: ");
+        String novoNome = LeitorConsole.lerLinha();
+
+        if (novoNome.isEmpty()) {
+            System.out.println("Nome não pode ser vazio. Operação cancelada.");
+            return;
+        }
+
+        if (simulador.cadastrarAnalista(novoNome)) {
+            System.out.println("\n[SUCESSO] Analista '" + novoNome + "' criado!");
+            System.out.println("O sistema limpou a tela e já ativou o perfil dele como atual.");
+        } else {
+            System.out.println("\n[ERRO] Já existe um analista cadastrado com o nome '" + novoNome + "'.");
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // Consultas e cargas (H1–H7)
     // -----------------------------------------------------------------------
 
     private void exibirEstadios() {
@@ -114,7 +200,7 @@ public class MenuTerminal {
 
     private void exibirPartidasPorGrupo() {
         System.out.print("\nDigite a letra do grupo (ex: A, B, C): ");
-        String entrada_str = entrada.nextLine().trim().toUpperCase();
+        String entrada_str = LeitorConsole.lerLinha().toUpperCase();
 
         if (entrada_str.isEmpty()) {
             System.out.println("Entrada vazia. Operação cancelada.");
@@ -133,34 +219,35 @@ public class MenuTerminal {
         }
     }
 
-    // -----------------------------------------------------------------------
-    // H2 — Importação de palpites
-    // -----------------------------------------------------------------------
-
     private void importarPalpites() {
-    System.out.print("\nDigite o nome do arquivo CSV em src/resources/");
-    System.out.print("\n(ou pressione Enter para usar '" + CAMINHO_PADRAO_PALPITES + "'): ");
-    String nomeArquivo = entrada.nextLine().trim();
+        System.out.print("\nDigite o nome do arquivo CSV em src/resources/");
+        System.out.print("\n(ou pressione Enter para usar '" + CAMINHO_PADRAO_PALPITES + "'): ");
+        String nomeArquivo = LeitorConsole.lerLinha();
 
-    String caminho;
-    if (nomeArquivo.isEmpty()) {
-        caminho = CAMINHO_PADRAO_PALPITES;  // "src/resources/modelo_palpites.csv"
-    } else {
-        caminho = "src/resources/" + nomeArquivo;
+        String caminho;
+        if (nomeArquivo.isEmpty()) {
+            caminho = CAMINHO_PADRAO_PALPITES;
+        } else {
+            caminho = "src/resources/" + nomeArquivo;
+        }
+
+        ResultadoImportacaoPalpites resultado = simulador.importarPalpites(caminho);
+        System.out.println("\nForam importados/atualizados " + resultado.getRegistrados() + " palpites para o perfil [" + simulador.getAnalistaAtivo().getNome() + "]!");
+        if (resultado.getBloqueadosPorResultado() > 0) {
+            System.out.println("Atenção: " + resultado.getBloqueadosPorResultado() + " palpite(s) ignorado(s): partida(s) já finalizada(s) com resultado oficial importado.");
+        }
+        if (resultado.getBloqueadosPorSnapshot() > 0) {
+            System.out.println("Atenção: " + resultado.getBloqueadosPorSnapshot() + " palpite(s) ignorado(s): partida(s) já ocorrida(s) antes da sincronização web (modo online ativo).");
+        }
+        if (resultado.getParciais() > 0) {
+            System.out.println("Atenção: " + resultado.getParciais() + " linha(s) ignorada(s) por palpite incompleto (apenas um gol preenchido).");
+        }
     }
-
-    int quantidade = simulador.importarPalpites(caminho);
-    System.out.println("\nForam importados/atualizados " + quantidade + " palpites com sucesso!");
-}
-
-    // -----------------------------------------------------------------------
-    // H4 — Importação de resultados oficiais
-    // -----------------------------------------------------------------------
 
     private void importarResultadosOficiais() {
         System.out.print("\nDigite o nome do arquivo CSV em src/resources/");
         System.out.print("\n(ou pressione Enter para usar '" + CAMINHO_PADRAO_RESULTADOS + "'): ");
-        String nomeArquivo = entrada.nextLine().trim();
+        String nomeArquivo = LeitorConsole.lerLinha();
 
         String caminho;
         if (nomeArquivo.isEmpty()) {
@@ -174,50 +261,65 @@ public class MenuTerminal {
         System.out.println("Partidas importadas agora têm status FINALIZADA e não aceitam novos palpites.");
     }
 
-    // -----------------------------------------------------------------------
-    // H3 — Tabela de classificação do grupo
-    // -----------------------------------------------------------------------
-
     private void exibirClassificacaoGrupo() {
         System.out.print("\nDigite a letra do grupo (ex: A, B, C): ");
-        String entrada_str = entrada.nextLine().trim().toUpperCase();
+        String entrada_str = LeitorConsole.lerLinha().toUpperCase();
 
         if (entrada_str.isEmpty()) {
             System.out.println("Entrada vazia. Operação cancelada.");
             return;
         }
 
-        try {
-            List<EstatisticasSelecao> classificacao =
-                    simulador.obterClassificacaoGrupo(entrada_str.charAt(0));
+        Grupo grupoEscolhido = simulador.buscarGrupo(entrada_str.charAt(0));
+        if (grupoEscolhido == null) {
+            System.out.println("Grupo '" + entrada_str + "' não encontrado.");
+            return;
+        }
 
-            System.out.println("\n--- Tabela de Classificação do Grupo " + entrada_str + " ---");
-            System.out.printf("%-4s | %-22s | %-3s | %-3s | %-5s | %-5s%n",
-                    "Pos", "Seleção", "Pts", "V", "SG", "GP");
-            System.out.println("------------------------------------------------------");
+        System.out.println("\nQual visão da tabela deseja exibir?");
+        System.out.println("  1 - Oficial (baseada nos resultados oficiais dos jogos)");
+        System.out.println("  2 - Palpites (baseada nos palpites do analista ativo)");
+        System.out.print("Opção: ");
+        String opcaoVisao = LeitorConsole.lerLinha().trim();
 
-            for (int i = 0; i < classificacao.size(); i++) {
-                EstatisticasSelecao est = classificacao.get(i);
-                System.out.printf("%2dº  | %-22s | %3d | %3d | %5d | %5d%n",
-                        (i + 1),
-                        est.getSelecao().getNome(),
-                        est.getPontos(),
-                        est.getVitorias(),
-                        est.getSaldoGols(),
-                        est.getGolsPro());
-            }
-        } catch (IllegalArgumentException e) {
-            System.out.println("\nErro: " + e.getMessage());
+        List<EstatisticasSelecao> classificacao;
+        String tituloVisao;
+
+        if ("1".equals(opcaoVisao)) {
+            classificacao = grupoEscolhido.getClassificacao();
+            tituloVisao = "Oficial";
+        } else if ("2".equals(opcaoVisao)) {
+            classificacao = grupoEscolhido.getClassificacaoPelosPalpites();
+            String nomeAnalista = simulador.getAnalistaAtivo() != null
+                    ? simulador.getAnalistaAtivo().getNome()
+                    : "Nenhum";
+            tituloVisao = "Palpites de [" + nomeAnalista + "]";
+        } else {
+            System.out.println("Opção inválida. Operação cancelada.");
+            return;
+        }
+
+        System.out.println("\n--- Tabela de Classificação do Grupo " + entrada_str
+                + " (" + tituloVisao + ") ---");
+        System.out.printf("%-4s | %-22s | %-3s | %-3s | %-5s | %-5s%n",
+                "Pos", "Seleção", "Pts", "V", "SG", "GP");
+        System.out.println("------------------------------------------------------");
+
+        for (int i = 0; i < classificacao.size(); i++) {
+            EstatisticasSelecao est = classificacao.get(i);
+            System.out.printf("%2dº  | %-22s | %3d | %3d | %5d | %5d%n",
+                    (i + 1),
+                    est.getSelecao().getNome(),
+                    est.getPontos(),
+                    est.getVitorias(),
+                    est.getSaldoGols(),
+                    est.getGolsPro());
         }
     }
 
-    // -----------------------------------------------------------------------
-    // H5 — Pontuação de uma partida específica
-    // -----------------------------------------------------------------------
-
     private void exibirPontuacaoPartida() {
         System.out.print("\nDigite o ID da partida: ");
-        String entrada_str = entrada.nextLine().trim();
+        String entrada_str = LeitorConsole.lerLinha();
 
         if (entrada_str.isEmpty()) {
             System.out.println("Entrada vazia. Operação cancelada.");
@@ -258,37 +360,55 @@ public class MenuTerminal {
         }
     }
 
-    // -----------------------------------------------------------------------
-    // H6 — Pontuação total de todos os palpites
-    // -----------------------------------------------------------------------
-
+    // Exibe a pontuação de todas as partidas com palpite do analista ativo (H6/H7)
     private void exibirPontuacaoTotal() {
-        List<ResultadoPontuacao> resultados = simulador.calcularPontuacaoTotal();
+        List<Partida> todasPartidas = simulador.getPartidas();
+        boolean temAlgumPalpite = false;
+        for (Partida p : todasPartidas) {
+            if (p.temPalpite()) { temAlgumPalpite = true; break; }
+        }
 
-        if (resultados.isEmpty()) {
-            System.out.println("\nNenhuma partida finalizada com palpite encontrada.");
-            System.out.println("Importe palpites e resultados oficiais antes de consultar a pontuação.");
+        if (!temAlgumPalpite) {
+            System.out.println("\nNenhuma partida com palpite encontrada para o analista [" + simulador.getAnalistaAtivo().getNome() + "].");
             return;
         }
 
-        System.out.println("\n--- Pontuação Total dos Palpites ---");
-        System.out.printf("%-10s | %-30s | %-10s | %-6s%n",
+        System.out.println("\n----- PONTUAÇÃO TOTAL DOS PALPITES -----");
+        System.out.printf("%-10s | %-35s | %-10s | %-6s%n",
                 "Partida", "Confronto", "Palpite", "Pontos");
-        System.out.println("-----------------------------------------------------------");
+        System.out.println("------------------------------------------------------------------------------");
 
-        for (ResultadoPontuacao resultado : resultados) {
-            Partida p = resultado.getPartida();
+        int totalPartidas = 0;
+        for (Partida p : todasPartidas) {
+            if (!p.temPalpite()) continue;
+
             String confronto = p.getTimeDaCasa().getNome() + " x " + p.getTimeVisitante().getNome();
             String palpite = p.getPalpite().getGolsTimeCasa() + " x " + p.getPalpite().getGolsTimeVisitante();
 
-            System.out.printf("%-10d | %-30s | %-10s | %6d%n",
-                    p.getId(),
-                    confronto,
-                    palpite,
-                    resultado.getTotalPontos());
+            ResultadoPontuacao resultado = simulador.calcularPontuacaoPartida(p.getId());
+            if (resultado != null) {
+                int pts = resultado.getTotalPontos();
+                totalPartidas += pts;
+                System.out.printf("%-10d | %-35s | %-10s | %6d%n", p.getId(), confronto, palpite, pts);
+            } else {
+                System.out.printf("%-10d | %-35s | %-10s | %6d  (jogo não ocorreu)%n", p.getId(), confronto, palpite, 0);
+            }
         }
 
-        System.out.println("-----------------------------------------------------------");
-        System.out.printf("%-55s %6d pts%n", "PONTUAÇÃO TOTAL:", simulador.somarPontuacao(resultados));
+        System.out.println("------------------------------------------------------------------------------");
+        System.out.printf("%-62s %6d pts%n", "PONTUAÇÃO DAS PARTIDAS:", totalPartidas);
+
+        // Bônus de classificação só é exibido quando todos os jogos do torneio estão finalizados (H7)
+        if (simulador.todasPartidasFinalizadas()) {
+            int totalBonus = simulador.calcularBonusTotalDeClassificacao();
+            int prestigioGeral = totalPartidas + totalBonus;
+            System.out.printf("%-62s %6d pts%n", "BÔNUS DE CLASSIFICAÇÃO:", totalBonus);
+            System.out.println("------------------------------------------------------------------------------");
+            System.out.printf("%-62s %6d pts%n", "PRESTÍGIO TOTAL ACUMULADO:", prestigioGeral);
+        } else {
+            System.out.printf("%-62s %s%n", "BÔNUS DE CLASSIFICAÇÃO:", "N/A (aguardando todos os jogos)");
+            System.out.println("------------------------------------------------------------------------------");
+            System.out.printf("%-62s %6d pts%n", "PRESTÍGIO TOTAL ACUMULADO:", totalPartidas);
+        }
     }
 }

@@ -1,15 +1,7 @@
 package br.ufla.copa.core.contracts;
 
-/** 
- * Interface que define o contrato para uma regra de pontuação para a 
- * classificação de um país na fase de grupos
- */
+// Contrato para a regra de bônus pela classificação de um país na fase de grupos (H7)
 public interface RegraDePontuacaoDeClassificacao {
-    /**
-     * Calcula a pontuação pela classificação de um país na fase de grupos
-     * @param palpitePosicao posição do país de acordo com os palpites
-     * @param oficialPosicao posição do país na classificação real
-     * @return A pontuação obtida nesta regra.
-     */
+    // Retorna os pontos pelo acerto da posição (1º=15, 2º=10, 3º=5, qualquer outro=0)
     int calcularPontosPorPosicao(int palpitesPosicao, int oficialPosicao);
 }

@@ -1,23 +1,19 @@
 package br.ufla.copa.core.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-/**
- * Representa um grupo da fase de grupos da Copa do Mundo.
- * Agrega as seleções, partidas e calcula a classificação com desempate correto (H3).
- */
+// Grupo da fase de grupos: agrega seleções e partidas e calcula classificações (H3/H4)
 public class Grupo {
     private final char nome;
     private final List<Selecao> selecoes;
     private final List<Partida> partidas;
-    private final List<EstatisticasSelecao> classificacao;
 
     public Grupo(char nome) {
         this.nome = nome;
         this.selecoes = new ArrayList<>();
         this.partidas = new ArrayList<>();
-        this.classificacao = new ArrayList<>();
     }
 
     public char getNome() {
@@ -25,21 +21,18 @@ public class Grupo {
     }
 
     public List<Selecao> getSelecoes() {
-        return selecoes;
+        return Collections.unmodifiableList(selecoes);
     }
 
     public List<Partida> getPartidas() {
-        return partidas;
+        return Collections.unmodifiableList(partidas);
     }
 
-    /**
-     * Retorna a tabela de classificação calculada e ordenada.
-     * Usa resultados oficiais quando disponíveis; palpites caso contrário (H3/H4).
-     */
+    // Classificação oficial baseada nos resultados importados; recalculada a cada chamada
     public List<EstatisticasSelecao> getClassificacao() {
-        computarClassificacao();
-        classificacao.sort(new ClassificacaoComparator());
-        return classificacao;
+        List<EstatisticasSelecao> resultado = computarClassificacao();
+        resultado.sort(new ClassificacaoComparator());
+        return resultado;
     }
 
     public void adicionarSelecao(Selecao selecao) {
@@ -54,21 +47,17 @@ public class Grupo {
         }
     }
 
-    /**
-     * Reconstrói a lista de estatísticas do zero a cada chamada,
-     * garantindo que mudanças nos palpites ou resultados sejam refletidas.
-     * Registra tanto as estatísticas gerais quanto as de confronto direto,
-     * necessárias para o desempate correto (critérios a, b, c do enunciado H3).
-     */
-    private void computarClassificacao() {
-        classificacao.clear();
+    // Reconstrói as estatísticas do zero usando resultados oficiais (FINALIZADA),
+    // registrando também confrontos diretos necessários para o desempate correto (H3)
+    private List<EstatisticasSelecao> computarClassificacao() {
+        List<EstatisticasSelecao> stats = new ArrayList<>();
         for (Selecao s : selecoes) {
-            classificacao.add(new EstatisticasSelecao(s));
+            stats.add(new EstatisticasSelecao(s));
         }
 
         for (Partida p : partidas) {
-            EstatisticasSelecao casa = buscarEstatisticas(p.getTimeDaCasa());
-            EstatisticasSelecao visitante = buscarEstatisticas(p.getTimeVisitante());
+            EstatisticasSelecao casa = buscarEstatisticasNaLista(stats, p.getTimeDaCasa());
+            EstatisticasSelecao visitante = buscarEstatisticasNaLista(stats, p.getTimeVisitante());
 
             if (casa == null || visitante == null) continue;
 
@@ -80,10 +69,6 @@ public class Grupo {
                 golsCasa = p.getGolsTimeCasaOficial();
                 golsVisitante = p.getGolsTimeVisitanteOficial();
                 temDados = true;
-            } else if (p.temPalpite()) {
-                golsCasa = p.getPalpite().getGolsTimeCasa();
-                golsVisitante = p.getPalpite().getGolsTimeVisitante();
-                temDados = true;
             } else {
                 temDados = false;
                 golsCasa = 0;
@@ -91,7 +76,6 @@ public class Grupo {
             }
 
             if (temDados) {
-                // Estatísticas gerais do grupo
                 casa.registrarResultado(golsCasa, golsVisitante);
                 visitante.registrarResultado(golsVisitante, golsCasa);
 
@@ -100,13 +84,41 @@ public class Grupo {
                 visitante.registrarConfrontoDirecto(p.getTimeDaCasa(), golsVisitante, golsCasa);
             }
         }
+        return stats;
     }
 
-    private EstatisticasSelecao buscarEstatisticas(Selecao selecao) {
-        for (EstatisticasSelecao es : classificacao) {
-            if (es.getSelecao().equals(selecao)) {
-                return es;
-            }
+    // Classificação calculada exclusivamente pelos palpites do analista ativo (H7)
+    public List<EstatisticasSelecao> getClassificacaoPelosPalpites() {
+        List<EstatisticasSelecao> statsPalpite = new ArrayList<>();
+        for (Selecao s : selecoes) {
+            statsPalpite.add(new EstatisticasSelecao(s));
+        }
+
+        for (Partida p : partidas) {
+            if (!p.temPalpite()) continue;
+
+            EstatisticasSelecao casa = buscarEstatisticasNaLista(statsPalpite, p.getTimeDaCasa());
+            EstatisticasSelecao visitante = buscarEstatisticasNaLista(statsPalpite, p.getTimeVisitante());
+
+            if (casa == null || visitante == null) continue;
+
+            int golsCasa = p.getPalpite().getGolsTimeCasa();
+            int golsVisitante = p.getPalpite().getGolsTimeVisitante();
+
+            casa.registrarResultado(golsCasa, golsVisitante);
+            visitante.registrarResultado(golsVisitante, golsCasa);
+
+            casa.registrarConfrontoDirecto(p.getTimeVisitante(), golsCasa, golsVisitante);
+            visitante.registrarConfrontoDirecto(p.getTimeDaCasa(), golsVisitante, golsCasa);
+        }
+
+        statsPalpite.sort(new ClassificacaoComparator());
+        return statsPalpite;
+    }
+
+    private EstatisticasSelecao buscarEstatisticasNaLista(List<EstatisticasSelecao> lista, Selecao selecao) {
+        for (EstatisticasSelecao es : lista) {
+            if (es.getSelecao().equals(selecao)) return es;
         }
         return null;
     }

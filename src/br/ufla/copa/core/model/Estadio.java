@@ -17,15 +17,15 @@ public class Estadio {
         this.capacidade = 0;
     }
 
-    public String getNome() { 
-        return nome; 
+    public String getNome() {
+        return nome;
     }
 
     public String getPais() {
         return pais;
     }
-    
-    public int getCapacidade() { 
-        return capacidade; 
+
+    public int getCapacidade() {
+        return capacidade;
     }
 }

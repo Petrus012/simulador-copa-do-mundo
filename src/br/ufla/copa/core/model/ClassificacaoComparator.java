@@ -1,31 +1,27 @@
 package br.ufla.copa.core.model;
 
+import java.text.Collator;
 import java.util.Comparator;
+import java.util.Locale;
 
-/**
- * Comparador para ordenar a classificação do grupo seguindo os critérios
- * oficiais do regulamento da Copa do Mundo (H3):
- *
- * a) Maior número de pontos no confronto direto entre as equipes empatadas
- * b) Melhor saldo de gols no confronto direto
- * c) Maior número de gols marcados no confronto direto
- * d) Melhor saldo de gols considerando todas as partidas do grupo
- * e) Maior número de gols marcados em todas as partidas do grupo
- * f) Ordem alfabética (critério final por falta de dados de cartões/ranking FIFA)
- */
+// Ordena a classificação do grupo pelos critérios oficiais da Copa (H3):
+// a) pontos no confronto direto  b) saldo no confronto direto
+// c) gols no confronto direto    d) saldo geral  e) gols geral  f) ordem alfabética
 public class ClassificacaoComparator implements Comparator<EstatisticasSelecao> {
+
+    // Collator pt-BR garante ordenação correta de nomes com acentos no critério f
+    private static final Collator COLLATOR = Collator.getInstance(new Locale("pt", "BR"));
 
     @Override
     public int compare(EstatisticasSelecao t1, EstatisticasSelecao t2) {
-        // 1º critério: pontos gerais no grupo
+        // Pontos gerais no grupo
         int compPontos = Integer.compare(t2.getPontos(), t1.getPontos());
         if (compPontos != 0) return compPontos;
 
-        // Critérios a, b, c: confronto direto entre as duas seleções empatadas
         Selecao sel1 = t1.getSelecao();
         Selecao sel2 = t2.getSelecao();
 
-        // a) Pontos no confronto direto entre si
+        // a) Pontos no confronto direto
         int pontosT1Direto = t1.getPontosConfrontoDirecto(sel2);
         int pontosT2Direto = t2.getPontosConfrontoDirecto(sel1);
         int compConfrontoPontos = Integer.compare(pontosT2Direto, pontosT1Direto);
@@ -51,7 +47,7 @@ public class ClassificacaoComparator implements Comparator<EstatisticasSelecao> 
         int compGolsPro = Integer.compare(t2.getGolsPro(), t1.getGolsPro());
         if (compGolsPro != 0) return compGolsPro;
 
-        // f) Ordem alfabética
-        return t1.getSelecao().getNome().compareTo(t2.getSelecao().getNome());
+        // f) Ordem alfabética com tratamento correto de acentos
+        return COLLATOR.compare(t1.getSelecao().getNome(), t2.getSelecao().getNome());
     }
 }
