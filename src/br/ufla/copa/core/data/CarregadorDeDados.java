@@ -189,6 +189,9 @@ public class CarregadorDeDados {
     public Map<Integer, Palpite> lerPalpitesDoArquivo(String caminhoArquivo, int[] parciais) {
         Map<Integer, Palpite> resultado = new HashMap<>();
         parciais[0] = 0;
+        if (!Files.exists(Path.of(caminhoArquivo))) {
+            throw new IllegalArgumentException("Arquivo não encontrado: " + caminhoArquivo);
+        }
         try (BufferedReader leitor = Files.newBufferedReader(Path.of(caminhoArquivo), StandardCharsets.UTF_8)) {
             leitor.readLine(); // pula cabeçalho
             String linha = leitor.readLine();
@@ -239,6 +242,10 @@ public class CarregadorDeDados {
     // garantindo que partidas ausentes voltem para AGENDADA (H4)
     public void importarResultadosOficiais(String caminhoArquivo) {
         Path caminho = Path.of(caminhoArquivo);
+
+        if (!Files.exists(caminho)) {
+            throw new IllegalArgumentException("Arquivo não encontrado: " + caminhoArquivo);
+        }
 
         for (Partida p : partidas) {
             p.limparResultadoOficial();

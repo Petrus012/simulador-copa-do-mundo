@@ -231,16 +231,20 @@ public class MenuTerminal {
             caminho = "src/resources/" + nomeArquivo;
         }
 
-        ResultadoImportacaoPalpites resultado = simulador.importarPalpites(caminho);
-        System.out.println("\nForam importados/atualizados " + resultado.getRegistrados() + " palpites para o perfil [" + simulador.getAnalistaAtivo().getNome() + "]!");
-        if (resultado.getBloqueadosPorResultado() > 0) {
-            System.out.println("Atenção: " + resultado.getBloqueadosPorResultado() + " palpite(s) ignorado(s): partida(s) já finalizada(s) com resultado oficial importado.");
-        }
-        if (resultado.getBloqueadosPorSnapshot() > 0) {
-            System.out.println("Atenção: " + resultado.getBloqueadosPorSnapshot() + " palpite(s) ignorado(s): partida(s) já ocorrida(s) antes da sincronização web (modo online ativo).");
-        }
-        if (resultado.getParciais() > 0) {
-            System.out.println("Atenção: " + resultado.getParciais() + " linha(s) ignorada(s) por palpite incompleto (apenas um gol preenchido).");
+        try {
+            ResultadoImportacaoPalpites resultado = simulador.importarPalpites(caminho);
+            System.out.println("\nForam importados/atualizados " + resultado.getRegistrados() + " palpites para o perfil [" + simulador.getAnalistaAtivo().getNome() + "]!");
+            if (resultado.getBloqueadosPorResultado() > 0) {
+                System.out.println("Atenção: " + resultado.getBloqueadosPorResultado() + " palpite(s) ignorado(s): partida(s) já finalizada(s) com resultado oficial importado.");
+            }
+            if (resultado.getBloqueadosPorSnapshot() > 0) {
+                System.out.println("Atenção: " + resultado.getBloqueadosPorSnapshot() + " palpite(s) ignorado(s): partida(s) já ocorrida(s) antes da sincronização web (modo online ativo).");
+            }
+            if (resultado.getParciais() > 0) {
+                System.out.println("Atenção: " + resultado.getParciais() + " linha(s) ignorada(s) por palpite incompleto (apenas um gol preenchido).");
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("\n[ERRO] Importação cancelada: " + e.getMessage());
         }
     }
 
@@ -256,9 +260,13 @@ public class MenuTerminal {
             caminho = "src/resources/" + nomeArquivo;
         }
 
-        simulador.importarResultadosOficiais(caminho);
-        System.out.println("\nResultados oficiais importados com sucesso!");
-        System.out.println("Partidas importadas agora têm status FINALIZADA e não aceitam novos palpites.");
+        try {
+            simulador.importarResultadosOficiais(caminho);
+            System.out.println("\nResultados oficiais importados com sucesso!");
+            System.out.println("Partidas importadas agora têm status FINALIZADA e não aceitam novos palpites.");
+        } catch (IllegalArgumentException e) {
+            System.out.println("\n[ERRO] Importação cancelada: " + e.getMessage());
+        }
     }
 
     private void exibirClassificacaoGrupo() {
