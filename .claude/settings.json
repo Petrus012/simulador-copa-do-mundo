@@ -12,7 +12,8 @@
       "PowerShell(git stash pop)",
       "PowerShell(git checkout .claude/settings.json 2>$null)",
       "PowerShell(git stash drop)",
-      "PowerShell(head -20)"
+      "PowerShell(head -20)",
+      "Bash(grep -v \"//\")"
     ]
   }
 }

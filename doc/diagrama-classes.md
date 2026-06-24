@@ -25,8 +25,12 @@ classDiagram
     class EstatisticasSelecao
     class Grupo
     class ClassificacaoComparator
+    class ResultadoImportacaoPalpites
 
     %% ── REGRAS DE PONTUAÇÃO ──────────────────────────────────────────────────
+    class RegraAbstrataDePalpite {
+        <<abstract>>
+    }
     class RegraVencedorOuEmpate
     class RegraSaldoDeGols
     class RegraGolsDoVencedor
@@ -53,15 +57,19 @@ classDiagram
     class MainView
     class PalpitesView
     class RankingView
+    class GridClassificacao
 
     %% ── REALIZAÇÕES (implementação de interfaces) ────────────────────────────
-    RegraVencedorOuEmpate    ..|> RegraDePontuacaoDePalpite
-    RegraSaldoDeGols         ..|> RegraDePontuacaoDePalpite
-    RegraGolsDoVencedor      ..|> RegraDePontuacaoDePalpite
-    RegraGolsDoPerdedor      ..|> RegraDePontuacaoDePalpite
-    RegraApostouEmpateNaoFoi ..|> RegraDePontuacaoDePalpite
-    RegraPlacarExatoEmpate   ..|> RegraDePontuacaoDePalpite
+    RegraAbstrataDePalpite   ..|> RegraDePontuacaoDePalpite
     RegraPosicaoFinal        ..|> RegraDePontuacaoDeClassificacao
+
+    %% ── HERANÇA ─────────────────────────────────────────────────────────────
+    RegraVencedorOuEmpate    --|> RegraAbstrataDePalpite
+    RegraSaldoDeGols         --|> RegraAbstrataDePalpite
+    RegraGolsDoVencedor      --|> RegraAbstrataDePalpite
+    RegraGolsDoPerdedor      --|> RegraAbstrataDePalpite
+    RegraApostouEmpateNaoFoi --|> RegraAbstrataDePalpite
+    RegraPlacarExatoEmpate   --|> RegraAbstrataDePalpite
 
     %% ── COMPOSIÇÃO / AGREGAÇÃO (model) ──────────────────────────────────────
     Partida             "1" *-- "2" Selecao
@@ -70,7 +78,7 @@ classDiagram
     Analista            "1" *-- "*"  Palpite
     Grupo               "1" *-- "*"  Selecao
     Grupo               "1" *-- "*"  Partida
-    Grupo               "1" *-- "*"  EstatisticasSelecao
+    Grupo                   -->       EstatisticasSelecao
     EstatisticasSelecao     -->       Selecao
     ClassificacaoComparator -->       EstatisticasSelecao
 
@@ -78,9 +86,12 @@ classDiagram
     SimuladorAnalistasCopaDoMundo "1" *-- "1" CarregadorDeDados
     SimuladorAnalistasCopaDoMundo "1" *-- "1" MotorDePontuacao
     SimuladorAnalistasCopaDoMundo "1" *-- "*" Analista
+    SimuladorAnalistasCopaDoMundo     -->      ResultadoImportacaoPalpites
+    SimuladorAnalistasCopaDoMundo     -->      ItemRankingGeral
     MotorDePontuacao              "1" *-- "*" RegraDePontuacaoDePalpite
     MotorDePontuacao                  -->      RegraDePontuacaoDeClassificacao
     ResultadoPontuacao                -->      Partida
+    ResultadoImportacaoPalpites       -->      Palpite
 
     %% ── DATA ─────────────────────────────────────────────────────────────────
     CarregadorDeDados --> Grupo
@@ -89,12 +100,16 @@ classDiagram
     CarregadorDeDados --> Analista
 
     %% ── UI ───────────────────────────────────────────────────────────────────
-    MenuTerminal  --> SimuladorAnalistasCopaDoMundo
-    MenuTerminal  --> LeitorConsole
-    MainView      --> SimuladorAnalistasCopaDoMundo
-    PalpitesView  --> SimuladorAnalistasCopaDoMundo
-    RankingView   --> SimuladorAnalistasCopaDoMundo
-    MainLayout    --> MainView
-    MainLayout    --> PalpitesView
-    MainLayout    --> RankingView
+    MenuTerminal      --> SimuladorAnalistasCopaDoMundo
+    MenuTerminal      --> LeitorConsole
+    MenuTerminal      --> ResultadoImportacaoPalpites
+    MainView          --> SimuladorAnalistasCopaDoMundo
+    PalpitesView      --> SimuladorAnalistasCopaDoMundo
+    PalpitesView      --> GridClassificacao
+    RankingView       --> SimuladorAnalistasCopaDoMundo
+    RankingView       --> ItemRankingGeral
+    MainLayout        --> MainView
+    MainLayout        --> PalpitesView
+    MainLayout        --> RankingView
+    GridClassificacao --> EstatisticasSelecao
 ```

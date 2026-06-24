@@ -7,6 +7,7 @@ import br.ufla.copa.core.model.Estadio;
 import br.ufla.copa.core.model.Grupo;
 import br.ufla.copa.core.model.Partida;
 import br.ufla.copa.core.model.EstatisticasSelecao;
+import br.ufla.copa.core.model.ResultadoImportacaoPalpites;
 import br.ufla.copa.core.service.ItemRankingGeral;
 import br.ufla.copa.core.service.ResultadoPontuacao;
 import br.ufla.copa.core.service.SimuladorAnalistasCopaDoMundo;
@@ -226,8 +227,11 @@ public class MenuTerminal {
             caminho = "src/resources/" + nomeArquivo;
         }
 
-        int quantidade = simulador.importarPalpites(caminho);
-        System.out.println("\nForam importados/atualizados " + quantidade + " palpites para o perfil [" + simulador.getAnalistaAtivo().getNome() + "]!");
+        ResultadoImportacaoPalpites resultado = simulador.importarPalpites(caminho);
+        System.out.println("\nForam importados/atualizados " + resultado.getRegistrados() + " palpites para o perfil [" + simulador.getAnalistaAtivo().getNome() + "]!");
+        if (resultado.getParciais() > 0) {
+            System.out.println("Atenção: " + resultado.getParciais() + " linha(s) ignorada(s) por palpite incompleto (apenas um gol preenchido).");
+        }
     }
 
     private void importarResultadosOficiais() {

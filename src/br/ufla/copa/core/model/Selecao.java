@@ -3,7 +3,7 @@ package br.ufla.copa.core.model;
 import java.util.Objects;
 
 public class Selecao {
-    private String nome;
+    private final String nome;
 
     public Selecao(String nome) {
         this.nome = nome;
@@ -27,5 +27,10 @@ public class Selecao {
         
         Selecao outraSelecao = (Selecao) obj;
         return Objects.equals(this.nome, outraSelecao.getNome());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nome);
     }
 }

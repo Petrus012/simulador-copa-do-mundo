@@ -5,6 +5,7 @@ import br.ufla.copa.core.model.Estadio;
 import br.ufla.copa.core.model.Grupo;
 import br.ufla.copa.core.model.Palpite;
 import br.ufla.copa.core.model.Partida;
+import br.ufla.copa.core.model.ResultadoImportacaoPalpites;
 import br.ufla.copa.core.model.Selecao;
 import br.ufla.copa.core.model.StatusPartida;
 
@@ -24,7 +25,9 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CarregadorDeDados {
     private static final String CAMINHO_PARTIDAS = "src/resources/partidas.csv";
@@ -150,40 +153,58 @@ public class CarregadorDeDados {
         }
     }
 
-    public int importarPalpites(String caminhoArquivo) {
-        Path caminho = Path.of(caminhoArquivo);
-        int palpitesRegistrados = 0;
-
-        try (BufferedReader leitor = Files.newBufferedReader(caminho, StandardCharsets.UTF_8)) {
-            String linha = leitor.readLine(); 
-            while ((linha = leitor.readLine()) != null) {
-                if (linha.isBlank()) continue;
-
-                String[] campos = linha.split(",", -1);
-                if (campos.length < 5) continue; 
-
-                int idPartida = Integer.parseInt(campos[0].trim());
-                String golsCasaStr = campos[2].trim(); 
-                String golsVisStr = campos[4].trim();
-
-                if (golsCasaStr.isEmpty() || golsVisStr.isEmpty()) continue;
-
-                int golsCasa = Integer.parseInt(golsCasaStr);
-                int golsVis = Integer.parseInt(golsVisStr);
-
-                if (golsCasa < 0 || golsVis < 0) continue;
-
-                Partida partida = buscarPartidaPorId(idPartida);
-                if (partida != null && partida.getStatus() != StatusPartida.FINALIZADA) {
-                    Palpite palpite = new Palpite(golsCasa, golsVis);
-                    partida.setPalpite(palpite);
-                    palpitesRegistrados++;
+    /**
+     * Lê todos os palpites válidos de um CSV e os retorna como Map id→Palpite.
+     * Não aplica nenhuma regra de negócio (FINALIZADA, etc.) — apenas faz o parsing.
+     * Usado por importarPalpites() e pelo cofre do Analista (H8).
+     * O array parciais recebe em [0] o total de linhas com preenchimento parcial (H2).
+     */
+    public Map<Integer, Palpite> lerPalpitesDoArquivo(String caminhoArquivo, int[] parciais) {
+        Map<Integer, Palpite> resultado = new HashMap<>();
+        parciais[0] = 0;
+        try (BufferedReader leitor = Files.newBufferedReader(Path.of(caminhoArquivo), StandardCharsets.UTF_8)) {
+            leitor.readLine(); // pula cabeçalho
+            String linha = leitor.readLine();
+            while (linha != null) {
+                if (!linha.isBlank()) {
+                    String[] campos = linha.split(",", -1);
+                    if (campos.length >= 5) {
+                        String golsCasaStr = campos[2].trim();
+                        String golsVisStr  = campos[4].trim();
+                        boolean temCasa = !golsCasaStr.isEmpty();
+                        boolean temVis  = !golsVisStr.isEmpty();
+                        if (temCasa && temVis) {
+                            int idPartida = Integer.parseInt(campos[0].trim());
+                            int golsCasa  = Integer.parseInt(golsCasaStr);
+                            int golsVis   = Integer.parseInt(golsVisStr);
+                            if (golsCasa >= 0 && golsVis >= 0) {
+                                resultado.put(idPartida, new Palpite(golsCasa, golsVis));
+                            }
+                        } else if (temCasa || temVis) {
+                            parciais[0]++;
+                        }
+                    }
                 }
+                linha = leitor.readLine();
             }
         } catch (IOException | NumberFormatException e) {
             System.err.println(e.getMessage());
         }
-        return palpitesRegistrados;
+        return resultado;
+    }
+
+    public ResultadoImportacaoPalpites importarPalpites(String caminhoArquivo) {
+        int[] parciais = new int[1];
+        Map<Integer, Palpite> palpites = lerPalpitesDoArquivo(caminhoArquivo, parciais);
+        int registrados = 0;
+        for (Map.Entry<Integer, Palpite> entrada : palpites.entrySet()) {
+            Partida partida = buscarPartidaPorId(entrada.getKey());
+            if (partida != null && partida.getStatus() != StatusPartida.FINALIZADA) {
+                partida.setPalpite(entrada.getValue());
+                registrados++;
+            }
+        }
+        return new ResultadoImportacaoPalpites(registrados, parciais[0], palpites);
     }
 
     public void importarResultadosOficiais(String caminhoArquivo) {

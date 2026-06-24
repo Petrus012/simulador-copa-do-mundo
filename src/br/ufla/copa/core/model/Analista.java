@@ -1,6 +1,7 @@
 package br.ufla.copa.core.model;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,9 +12,9 @@ import java.util.Map;
 public class Analista implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private String nome;
+    private final String nome;
     // Chave = ID da Partida | Valor = O Palpite daquele analista
-    private Map<Integer, Palpite> palpites;
+    private final Map<Integer, Palpite> palpites;
 
     public Analista(String nome) {
         this.nome = nome;
@@ -25,7 +26,7 @@ public class Analista implements Serializable {
     }
 
     public Map<Integer, Palpite> getPalpites() {
-        return palpites;
+        return Collections.unmodifiableMap(palpites);
     }
 
     public void registrarPalpite(int partidaId, Palpite palpite) {

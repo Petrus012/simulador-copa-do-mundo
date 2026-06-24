@@ -3,7 +3,6 @@ package br.ufla.copa.ui.web;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
@@ -14,7 +13,6 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
@@ -22,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.ufla.copa.core.model.Analista;
-import br.ufla.copa.core.model.EstatisticasSelecao;
 import br.ufla.copa.core.model.Grupo;
 import br.ufla.copa.core.model.Partida;
 import br.ufla.copa.core.model.StatusPartida;
@@ -54,7 +51,7 @@ public class PalpitesView extends VerticalLayout {
     private final VerticalLayout areaFormulario;
 
     // Grid de classificação pelos palpites
-    private final Grid<EstatisticasSelecao> gridClassificacaoPalpites;
+    private final GridClassificacao gridClassificacaoPalpites;
 
     // Estado do grupo exibido e das linhas do formulário (listas paralelas)
     private Grupo grupoAtual;
@@ -109,7 +106,7 @@ public class PalpitesView extends VerticalLayout {
 
         // ---- Classificação pelos palpites ----
         add(new H3("Classificação pelo meus Palpites"));
-        gridClassificacaoPalpites = criarGridClassificacao();
+        gridClassificacaoPalpites = new GridClassificacao();
         add(gridClassificacaoPalpites);
 
         // ---- Evento de troca de aba ----
@@ -154,50 +151,6 @@ public class PalpitesView extends VerticalLayout {
             tabs.add(aba);
         }
         return tabs;
-    }
-
-    private Grid<EstatisticasSelecao> criarGridClassificacao() {
-        Grid<EstatisticasSelecao> grid = new Grid<>();
-        grid.removeAllColumns();
-
-        grid.addColumn(new ValueProvider<EstatisticasSelecao, String>() {
-            @Override
-            public String apply(EstatisticasSelecao es) {
-                return es.getSelecao().getNome();
-            }
-        }).setHeader("País").setAutoWidth(true).setFlexGrow(1);
-
-        grid.addColumn(new ValueProvider<EstatisticasSelecao, Integer>() {
-            @Override
-            public Integer apply(EstatisticasSelecao es) {
-                return es.getPontos();
-            }
-        }).setHeader("Pts").setAutoWidth(true);
-
-        grid.addColumn(new ValueProvider<EstatisticasSelecao, Integer>() {
-            @Override
-            public Integer apply(EstatisticasSelecao es) {
-                return es.getVitorias();
-            }
-        }).setHeader("V").setAutoWidth(true);
-
-        grid.addColumn(new ValueProvider<EstatisticasSelecao, Integer>() {
-            @Override
-            public Integer apply(EstatisticasSelecao es) {
-                return es.getSaldoGols();
-            }
-        }).setHeader("SG").setAutoWidth(true);
-
-        grid.addColumn(new ValueProvider<EstatisticasSelecao, Integer>() {
-            @Override
-            public Integer apply(EstatisticasSelecao es) {
-                return es.getGolsPro();
-            }
-        }).setHeader("GP").setAutoWidth(true);
-
-        grid.setAllRowsVisible(true);
-        grid.setWidthFull();
-        return grid;
     }
 
     // -----------------------------------------------------------------------

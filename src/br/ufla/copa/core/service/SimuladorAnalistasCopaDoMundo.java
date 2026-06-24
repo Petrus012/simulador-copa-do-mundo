@@ -1,12 +1,8 @@
 package br.ufla.copa.core.service;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import br.ufla.copa.core.data.CarregadorDeDados;
 import br.ufla.copa.core.model.Analista;
@@ -15,6 +11,7 @@ import br.ufla.copa.core.model.Grupo;
 import br.ufla.copa.core.model.Palpite;
 import br.ufla.copa.core.model.Partida;
 import br.ufla.copa.core.model.Estadio;
+import br.ufla.copa.core.model.ResultadoImportacaoPalpites;
 import br.ufla.copa.core.model.StatusPartida;
 
 /**
@@ -234,40 +231,20 @@ public class SimuladorAnalistasCopaDoMundo {
      * para que o histórico de palpites submetidos antes da Copa seja preservado.
      * O bloqueio de H2 (não registrar na Partida se FINALIZADA) continua valendo.
      */
-    public int importarPalpites(String caminhoArquivo) {
-        int qtdImportada = carregador.importarPalpites(caminhoArquivo);
+    public ResultadoImportacaoPalpites importarPalpites(String caminhoArquivo) {
+        ResultadoImportacaoPalpites resultado = carregador.importarPalpites(caminhoArquivo);
 
         if (analistaAtivo != null) {
-            salvarTodosPalpitesDoCsvNoCofre(caminhoArquivo);
+            salvarTodosPalpitesDoCsvNoCofre(resultado);
         }
         hidratarPalpitesDoAnalistaAtivo();
         salvarEstadoDoSistema();
-        return qtdImportada;
+        return resultado;
     }
 
-    private void salvarTodosPalpitesDoCsvNoCofre(String caminhoArquivo) {
-        try (BufferedReader leitor = Files.newBufferedReader(Path.of(caminhoArquivo), StandardCharsets.UTF_8)) {
-            String linha = leitor.readLine();
-            while ((linha = leitor.readLine()) != null) {
-                if (linha.isBlank()) continue;
-
-                String[] campos = linha.split(",", -1);
-                if (campos.length < 5) continue;
-
-                String golsCasaStr = campos[2].trim();
-                String golsVisStr  = campos[4].trim();
-                if (golsCasaStr.isEmpty() || golsVisStr.isEmpty()) continue;
-
-                int idPartida = Integer.parseInt(campos[0].trim());
-                int golsCasa  = Integer.parseInt(golsCasaStr);
-                int golsVis   = Integer.parseInt(golsVisStr);
-
-                if (golsCasa < 0 || golsVis < 0) continue;
-
-                analistaAtivo.registrarPalpite(idPartida, new Palpite(golsCasa, golsVis));
-            }
-        } catch (IOException | NumberFormatException e) {
-            System.err.println("Aviso: erro ao salvar palpites no cofre — " + e.getMessage());
+    private void salvarTodosPalpitesDoCsvNoCofre(ResultadoImportacaoPalpites resultado) {
+        for (Map.Entry<Integer, Palpite> entrada : resultado.getPalpitesLidos().entrySet()) {
+            analistaAtivo.registrarPalpite(entrada.getKey(), entrada.getValue());
         }
     }
 

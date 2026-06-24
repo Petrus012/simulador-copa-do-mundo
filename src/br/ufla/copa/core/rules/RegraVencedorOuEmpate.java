@@ -1,22 +1,14 @@
 package br.ufla.copa.core.rules;
 
-import br.ufla.copa.core.contracts.RegraDePontuacaoDePalpite;
-
 /**
  * R1 — Vencedor ou Empate (10 pontos)
  * Concede pontos se o analista acertou qual time venceu,
  * ou se acertou que a partida terminaria empatada.
  */
-public class RegraVencedorOuEmpate implements RegraDePontuacaoDePalpite {
+public class RegraVencedorOuEmpate extends RegraAbstrataDePalpite {
 
-    @Override
-    public String getIdentificador() {
-        return "R1";
-    }
-
-    @Override
-    public String getDescricao() {
-        return "Acertou o vencedor ou que seria empate";
+    public RegraVencedorOuEmpate() {
+        super("R1", "Acertou o vencedor ou que seria empate");
     }
 
     @Override

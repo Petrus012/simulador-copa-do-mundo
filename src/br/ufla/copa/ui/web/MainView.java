@@ -14,7 +14,6 @@ import com.vaadin.flow.router.Route;
 import java.util.ArrayList;
 import java.util.List;
 
-import br.ufla.copa.core.model.EstatisticasSelecao;
 import br.ufla.copa.core.model.Grupo;
 import br.ufla.copa.core.model.Partida;
 import br.ufla.copa.core.model.StatusPartida;
@@ -35,7 +34,7 @@ public class MainView extends VerticalLayout {
     private final List<Tab> listaAbas;
 
     private final Grid<Partida> gridPartidas;
-    private final Grid<EstatisticasSelecao> gridClassificacao;
+    private final GridClassificacao gridClassificacao;
 
     public MainView() {
         simulador = SimuladorAnalistasCopaDoMundo.getInstance();
@@ -52,7 +51,7 @@ public class MainView extends VerticalLayout {
         add(gridPartidas);
 
         add(new H3("Classificação Oficial do Grupo"));
-        gridClassificacao = criarGridClassificacao();
+        gridClassificacao = new GridClassificacao();
         add(gridClassificacao);
 
         // Evento de troca de aba — usa Classe Anônima conforme requisito do trabalho
@@ -135,50 +134,6 @@ public class MainView extends VerticalLayout {
                 }
             }
         }).setHeader("Status").setAutoWidth(true);
-
-        grid.setAllRowsVisible(true);
-        grid.setWidthFull();
-        return grid;
-    }
-
-    private Grid<EstatisticasSelecao> criarGridClassificacao() {
-        Grid<EstatisticasSelecao> grid = new Grid<>();
-        grid.removeAllColumns();
-
-        grid.addColumn(new ValueProvider<EstatisticasSelecao, String>() {
-            @Override
-            public String apply(EstatisticasSelecao es) {
-                return es.getSelecao().getNome();
-            }
-        }).setHeader("País").setAutoWidth(true).setFlexGrow(1);
-
-        grid.addColumn(new ValueProvider<EstatisticasSelecao, Integer>() {
-            @Override
-            public Integer apply(EstatisticasSelecao es) {
-                return es.getPontos();
-            }
-        }).setHeader("Pts").setAutoWidth(true);
-
-        grid.addColumn(new ValueProvider<EstatisticasSelecao, Integer>() {
-            @Override
-            public Integer apply(EstatisticasSelecao es) {
-                return es.getVitorias();
-            }
-        }).setHeader("V").setAutoWidth(true);
-
-        grid.addColumn(new ValueProvider<EstatisticasSelecao, Integer>() {
-            @Override
-            public Integer apply(EstatisticasSelecao es) {
-                return es.getSaldoGols();
-            }
-        }).setHeader("SG").setAutoWidth(true);
-
-        grid.addColumn(new ValueProvider<EstatisticasSelecao, Integer>() {
-            @Override
-            public Integer apply(EstatisticasSelecao es) {
-                return es.getGolsPro();
-            }
-        }).setHeader("GP").setAutoWidth(true);
 
         grid.setAllRowsVisible(true);
         grid.setWidthFull();

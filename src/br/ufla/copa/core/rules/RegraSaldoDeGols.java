@@ -1,23 +1,15 @@
 package br.ufla.copa.core.rules;
 
-import br.ufla.copa.core.contracts.RegraDePontuacaoDePalpite;
-
 /**
  * R2 — Saldo de Gols (5 pontos)
  * Concede pontos se o analista acertou a diferença de gols entre as equipes.
  * Em caso de empate, acerta se também palpitou em empate (diferença = 0).
  * Exemplos: palpite 3x1 e resultado 2x0 — ambos têm diferença de 2 → acertou.
  */
-public class RegraSaldoDeGols implements RegraDePontuacaoDePalpite {
+public class RegraSaldoDeGols extends RegraAbstrataDePalpite {
 
-    @Override
-    public String getIdentificador() {
-        return "R2";
-    }
-
-    @Override
-    public String getDescricao() {
-        return "Acertou o saldo de gols da partida";
+    public RegraSaldoDeGols() {
+        super("R2", "Acertou o saldo de gols da partida");
     }
 
     @Override
